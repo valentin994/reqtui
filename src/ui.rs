@@ -57,8 +57,12 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let mode_footer = Paragraph::new(Line::from(current_navigation_text))
         .block(Block::default().borders(Borders::ALL));
 
+    let response =
+        Paragraph::new(app.response.to_string()).block(Block::default().borders(Borders::ALL));
+
     frame.render_widget(title, request[0]);
     frame.render_widget(divider, request[1]);
+    frame.render_widget(response, chunks[1]);
     frame.render_widget(mode_footer, chunks[2]);
 
     // Editing

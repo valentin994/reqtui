@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use tui_input::Input;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
@@ -21,17 +23,19 @@ impl App {
     pub fn quit(&mut self) {
         self.should_quit = true;
     }
+    // TODO: save history of the requests
 
-    pub fn start_updating_url(&mut self) {
-        self.current_screen = CurrentScreen::Editing;
+    // TODO: handler to send a http request
+    // TODO: do the response in json
+    // TODO: make it able to work for multiple types of requests
+    pub async fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
+        let body = reqwest::get(format!("https://{}", self.url))
+            .await?
+            .text()
+            .await?;
+        self.response = body;
+        Ok(())
     }
-
-    pub fn end_updating_url(&mut self) {
-        self.current_screen = CurrentScreen::Main;
-    }
-
-    // TODO: handler to send a htt prequest
-    pub fn send_request() {}
 
     pub fn print_json(&self) -> serde_json::Result<()> {
         println!("hell yeah");

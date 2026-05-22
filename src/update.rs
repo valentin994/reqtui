@@ -3,11 +3,15 @@ use tui_input::backend::crossterm::EventHandler;
 
 use crate::app::{App, CurrentScreen};
 
-pub fn update(app: &mut App, key_event: KeyEvent) {
+pub async fn update(app: &mut App, key_event: KeyEvent) {
     match app.current_screen {
         CurrentScreen::Main => match key_event.code {
             KeyCode::Esc | KeyCode::Char('q') => app.quit(),
             KeyCode::Char('e') => app.current_screen = CurrentScreen::Editing,
+            KeyCode::Enter => {
+                // TODO: Loading text, sometime animation
+                app.send_request().await.expect("Failed to fetch")
+            }
             _ => {}
         },
         CurrentScreen::Editing => match key_event.code {

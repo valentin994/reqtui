@@ -14,7 +14,8 @@ use update::update;
 use crate::app::App;
 
 // TODO: possibly update to tokio to use async
-fn main() -> Result<(), Box<dyn Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     // setup terminal
     let mut app = App::default();
 
@@ -31,7 +32,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         match tui.events.next()? {
             Event::Tick => {}
-            Event::Key(key_event) => update(&mut app, key_event),
+            Event::Key(key_event) => update(&mut app, key_event).await,
             Event::Mouse(_) => {}
             Event::Resize(_, _) => {}
         }
