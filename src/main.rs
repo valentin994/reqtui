@@ -13,6 +13,7 @@ use update::update;
 
 use crate::app::App;
 
+// TODO: possibly update to tokio to use async
 fn main() -> Result<(), Box<dyn Error>> {
     // setup terminal
     let mut app = App::default();

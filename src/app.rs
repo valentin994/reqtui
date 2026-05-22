@@ -12,8 +12,8 @@ pub enum CurrentScreen {
 pub struct App {
     pub current_screen: CurrentScreen,
     pub url: Input,
+    pub response: String,
     pub https: bool,
-    pub currently_editing: bool,
     pub should_quit: bool,
 }
 
@@ -29,6 +29,9 @@ impl App {
     pub fn end_updating_url(&mut self) {
         self.current_screen = CurrentScreen::Main;
     }
+
+    // TODO: handler to send a htt prequest
+    pub fn send_request() {}
 
     pub fn print_json(&self) -> serde_json::Result<()> {
         println!("hell yeah");

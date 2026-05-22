@@ -2,11 +2,11 @@ use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout},
     style::{Color, Style},
-    text::Text,
+    text::{Line, Span, Text},
     widgets::{Block, Borders, Clear, Paragraph},
 };
 
-use crate::app::App;
+use crate::app::{App, CurrentScreen};
 
 pub fn render(app: &mut App, frame: &mut Frame) {
     // Chunks of the area that are going to be displayed
@@ -47,19 +47,37 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     ))
     .block(search_block);
 
+    let current_navigation_text = match app.current_screen {
+        CurrentScreen::Main => Span::styled("Main", Style::default().fg(Color::Green)),
+        CurrentScreen::Editing => Span::styled("Editing", Style::default().fg(Color::Yellow)),
+        CurrentScreen::Exiting => Span::styled("Exiting", Style::default().fg(Color::LightRed)),
+    }
+    .to_owned();
+
+    let mode_footer = Paragraph::new(Line::from(current_navigation_text))
+        .block(Block::default().borders(Borders::ALL));
+
     frame.render_widget(title, request[0]);
     frame.render_widget(divider, request[1]);
+    frame.render_widget(mode_footer, chunks[2]);
 
     // Editing
 
-    if app.currently_editing {
-        let popup_block = Block::bordered().title("Popup");
+    if app.current_screen == CurrentScreen::Editing {
+        let popup_block = Block::bordered().title("Enter URL");
         let centered_area = frame
             .area()
             .centered(Constraint::Percentage(60), Constraint::Percentage(20));
-        // clears out any background in the area before rendering the popup
         frame.render_widget(Clear, centered_area);
-        let paragraph = Paragraph::new("Lorem ipsum").block(popup_block);
+
+        let width = centered_area.width.max(3) - 3;
+        let scroll = app.url.visual_scroll(width as usize);
+        // clears out any background in the area before rendering the popup
+        let paragraph = Paragraph::new(app.url.value())
+            .scroll((0, scroll as u16))
+            .block(popup_block);
         frame.render_widget(paragraph, centered_area);
+        let x = app.url.visual_cursor().max(scroll) - scroll + 1;
+        frame.set_cursor_position((centered_area.x + x as u16, centered_area.y + 1));
     }
 }
