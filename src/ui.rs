@@ -8,6 +8,12 @@ use ratatui::{
 
 use crate::app::{App, CurrentScreen};
 
+// TODO: UI revamp
+// TODO: moduliraze the UI
+// TODO: new layout
+// TODO: scrollbar for response part
+// TODO: use a theme
+
 pub fn render(app: &mut App, frame: &mut Frame) {
     // Chunks of the area that are going to be displayed
     let chunks = Layout::default()
@@ -19,33 +25,37 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         ])
         .split(frame.area());
 
-    let contraints = Constraint::from_percentages([10, 70, 20]);
-    let request = Layout::default()
+    let request_contraints = Constraint::from_percentages([10, 90]);
+    let request_layout = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints(contraints)
+        .constraints(request_contraints)
         .split(chunks[0]);
 
     let title_block = Block::default()
         .borders(Borders::ALL)
         .style(Style::default());
 
-    let title =
-        Paragraph::new(Text::styled("GET", Style::default().fg(Color::Green))).block(title_block);
+    let protocol_paragraph = Paragraph::new(Text::styled(
+        format!("{:?}", app.request_type),
+        Style::default().fg(Color::Green),
+    ))
+    .block(title_block);
 
-    let search_block = Block::default()
+    let url_block = Block::default()
         .borders(Borders::ALL)
         .style(Style::default());
 
-    let protocol = match app.https {
-        true => "https",
-        false => "http",
-    };
-
-    let divider = Paragraph::new(Text::styled(
-        format!("{}://{}", protocol, app.url),
+    let url_paragraph = Paragraph::new(Text::styled(
+        format!("{}://{}", app.protocol, app.url),
         Style::default().fg(Color::Cyan),
     ))
-    .block(search_block);
+    .block(url_block);
+
+    let footer_contraints = Constraint::from_percentages([10, 90]);
+    let footer_layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(footer_contraints)
+        .split(chunks[2]);
 
     let current_navigation_text = match app.current_screen {
         CurrentScreen::Main => Span::styled("Main", Style::default().fg(Color::Green)),
@@ -54,16 +64,37 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     }
     .to_owned();
 
-    let mode_footer = Paragraph::new(Line::from(current_navigation_text))
-        .block(Block::default().borders(Borders::ALL));
+    let navigation_text_paragraph =
+        Paragraph::new(current_navigation_text).block(Block::default().borders(Borders::ALL));
+
+    let current_key_help = {
+        match app.current_screen {
+            CurrentScreen::Main => Span::styled(
+                "(q) / (esc) to quit, (e) to edit url, (enter) to send reques",
+                Style::default().fg(Color::Red),
+            ),
+            CurrentScreen::Editing => Span::styled(
+                "(esc) to cancel, (enter) to save value",
+                Style::default().fg(Color::Red),
+            ),
+            CurrentScreen::Exiting => Span::styled(
+                "(esc) to cancel, (enter) to save value",
+                Style::default().fg(Color::Red),
+            ),
+        }
+    };
+
+    let current_screen_help =
+        Paragraph::new(Line::from(current_key_help)).block(Block::default().borders(Borders::ALL));
 
     let response =
         Paragraph::new(app.response.to_string()).block(Block::default().borders(Borders::ALL));
 
-    frame.render_widget(title, request[0]);
-    frame.render_widget(divider, request[1]);
+    frame.render_widget(protocol_paragraph, request_layout[0]);
+    frame.render_widget(url_paragraph, request_layout[1]);
     frame.render_widget(response, chunks[1]);
-    frame.render_widget(mode_footer, chunks[2]);
+    frame.render_widget(navigation_text_paragraph, footer_layout[0]);
+    frame.render_widget(current_screen_help, footer_layout[1]);
 
     // Editing
 
