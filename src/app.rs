@@ -1,5 +1,6 @@
 use std::error::Error;
 
+use reqwest::Client;
 use std::fmt;
 use tui_input::Input;
 
@@ -11,7 +12,6 @@ pub enum CurrentScreen {
     Exiting,
 }
 
-// TODO: on tab change request type
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum RequestType {
     #[default]
@@ -65,6 +65,7 @@ pub struct App {
     pub request_type: RequestType,
     pub protocol: Protocol,
     pub should_quit: bool,
+    pub client: Client,
 }
 
 impl App {
@@ -74,14 +75,23 @@ impl App {
     // TODO: save history of the requests
     // TODO: remove everything that is hardcoded
     // TODO: handler to send a http request
-    // TODO: do the response in json
-    // TODO: make it able to work for multiple types of requests
+    // TODO: do the response in json, better response handler
     pub async fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
-        let body = reqwest::get(format!("http://{}", self.url))
-            .await?
-            .text()
-            .await?;
-        self.response = body;
+        let prepare_request = match self.request_type {
+            RequestType::GET => self.client.get(format!("{}://{}", self.protocol, self.url)),
+            RequestType::POST => self
+                .client
+                .post(format!("{}://{}", self.protocol, self.url)),
+            RequestType::PUT => self.client.put(format!("{}://{}", self.protocol, self.url)),
+            RequestType::PATCH => self
+                .client
+                .patch(format!("{}://{}", self.protocol, self.url)),
+            RequestType::DELETE => self
+                .client
+                .delete(format!("{}://{}", self.protocol, self.url)),
+        };
+        let req = prepare_request.send().await?;
+        self.response = req.text().await?;
         Ok(())
     }
 
