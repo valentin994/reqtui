@@ -13,6 +13,7 @@ use crate::app::{App, CurrentScreen};
 // TODO: new layout
 // TODO: scrollbar for response part
 // TODO: use a theme
+// TODO: update footer with flex layout
 
 pub fn render(app: &mut App, frame: &mut Frame) {
     // Chunks of the area that are going to be displayed
@@ -51,6 +52,9 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     ))
     .block(url_block);
 
+    let response =
+        Paragraph::new(app.response.to_string()).block(Block::default().borders(Borders::ALL));
+
     let footer_contraints = Constraint::from_percentages([10, 90]);
     let footer_layout = Layout::default()
         .direction(Direction::Horizontal)
@@ -64,13 +68,12 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     }
     .to_owned();
 
-    let navigation_text_paragraph =
-        Paragraph::new(current_navigation_text).block(Block::default().borders(Borders::ALL));
+    let navigation_text_paragraph = Paragraph::new(current_navigation_text).block(Block::default());
 
     let current_key_help = {
         match app.current_screen {
             CurrentScreen::Main => Span::styled(
-                "(q) / (esc) to quit, (e) to edit url, (enter) to send reques",
+                "(q) / (esc) quit, (e) edit url, (tab) change request type,  (enter) send request",
                 Style::default().fg(Color::Red),
             ),
             CurrentScreen::Editing => Span::styled(
@@ -84,11 +87,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         }
     };
 
-    let current_screen_help =
-        Paragraph::new(Line::from(current_key_help)).block(Block::default().borders(Borders::ALL));
-
-    let response =
-        Paragraph::new(app.response.to_string()).block(Block::default().borders(Borders::ALL));
+    let current_screen_help = Paragraph::new(Line::from(current_key_help)).block(Block::default());
 
     frame.render_widget(protocol_paragraph, request_layout[0]);
     frame.render_widget(url_paragraph, request_layout[1]);

@@ -8,6 +8,7 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
         CurrentScreen::Main => match key_event.code {
             KeyCode::Esc | KeyCode::Char('q') => app.quit(),
             KeyCode::Char('e') => app.current_screen = CurrentScreen::Editing,
+            KeyCode::Tab => app.request_type = app.request_type.next(),
             KeyCode::Enter => {
                 // TODO: Loading text, sometime animation
                 app.send_request().await.expect("Failed to fetch")

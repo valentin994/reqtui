@@ -11,6 +11,7 @@ pub enum CurrentScreen {
     Exiting,
 }
 
+// TODO: on tab change request type
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum RequestType {
     #[default]
@@ -19,6 +20,26 @@ pub enum RequestType {
     DELETE,
     PATCH,
     PUT,
+}
+
+impl RequestType {
+    pub fn next(self) -> RequestType {
+        let idx = RequestType::VARIANTS
+            .iter()
+            .position(|&r| r == self)
+            .unwrap();
+        RequestType::VARIANTS[(idx + 1) % RequestType::VARIANTS.len()]
+    }
+}
+
+impl RequestType {
+    const VARIANTS: [RequestType; 5] = [
+        RequestType::GET,
+        RequestType::POST,
+        RequestType::DELETE,
+        RequestType::PATCH,
+        RequestType::PUT,
+    ];
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
