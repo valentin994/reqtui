@@ -73,7 +73,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let current_key_help = {
         match app.current_screen {
             CurrentScreen::Main => Span::styled(
-                "(q) / (esc) quit, (e) edit url, (tab) change request type,  (enter) send request",
+                "(q) / (esc) quit, (e) edit url, (tab) change request type, (p) change protocol, (enter) send request",
                 Style::default().fg(Color::Red),
             ),
             CurrentScreen::Editing => Span::styled(
