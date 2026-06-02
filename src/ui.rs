@@ -22,7 +22,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .constraints([
             Constraint::Length(3),
             Constraint::Min(1),
-            Constraint::Length(3),
+            Constraint::Length(1),
         ])
         .split(frame.area());
 
@@ -52,8 +52,16 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     ))
     .block(url_block);
 
-    let response =
-        Paragraph::new(app.response.to_string()).block(Block::default().borders(Borders::ALL));
+    // WARNING: not sure how to keep this, should the app.response be other type than string?
+    let pretty_json = serde_json::from_str::<serde_json::Value>(&app.response)
+        .map(|v| serde_json::to_string_pretty(&v).unwrap())
+        .unwrap_or_else(|_| app.response.clone()); // fallback to raw if not valid JSON
+
+    let lines: Vec<Line> = pretty_json
+        .lines()
+        .map(|line| Line::from(line.to_owned()))
+        .collect();
+    let response = Paragraph::new(lines).block(Block::default().borders(Borders::ALL));
 
     let footer_contraints = Constraint::from_percentages([10, 90]);
     let footer_layout = Layout::default()
