@@ -1,13 +1,15 @@
 use ratatui::crossterm::event::{Event, KeyCode, KeyEvent};
 use tui_input::backend::crossterm::EventHandler;
 
-use crate::app::{App, CurrentScreen, Protocol};
+use crate::api::Protocol;
+use crate::app::{App, CurrentScreen};
 
 pub async fn update(app: &mut App, key_event: KeyEvent) {
     match app.current_screen {
         CurrentScreen::Main => match key_event.code {
             KeyCode::Esc | KeyCode::Char('q') => app.quit(),
             KeyCode::Char('e') => app.current_screen = CurrentScreen::Editing,
+            KeyCode::Char(' ') => app.current_screen = CurrentScreen::History,
             // INFO:if I implement more protocols see RequestType iterator example for cycling
             KeyCode::Char('p') => {
                 app.protocol = match app.protocol {
@@ -29,6 +31,10 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
                 app.url.handle_event(&Event::Key(key_event));
             }
         },
-        CurrentScreen::Exiting => println!("fuck you i am out"),
+        CurrentScreen::History => match key_event.code {
+            KeyCode::Esc => app.current_screen = CurrentScreen::Main,
+            KeyCode::Char('q') => app.quit(),
+            _ => {}
+        },
     }
 }

@@ -1,3 +1,4 @@
+pub mod api;
 pub mod app;
 pub mod event;
 pub mod tui;
@@ -13,7 +14,6 @@ use update::update;
 
 use crate::app::App;
 
-// TODO: possibly update to tokio to use async
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // setup terminal

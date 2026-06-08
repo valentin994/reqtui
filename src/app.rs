@@ -1,35 +1,16 @@
 use std::error::Error;
 
 use reqwest::Client;
-use std::fmt;
 use tui_input::Input;
+
+use crate::api::{Protocol, Request, RequestType};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum CurrentScreen {
     #[default]
     Main,
     Editing,
-    Exiting,
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-pub enum RequestType {
-    #[default]
-    GET,
-    POST,
-    DELETE,
-    PATCH,
-    PUT,
-}
-
-impl RequestType {
-    pub fn next(self) -> RequestType {
-        let idx = RequestType::VARIANTS
-            .iter()
-            .position(|&r| r == self)
-            .unwrap();
-        RequestType::VARIANTS[(idx + 1) % RequestType::VARIANTS.len()]
-    }
+    History,
 }
 
 impl RequestType {
@@ -40,23 +21,15 @@ impl RequestType {
         RequestType::PATCH,
         RequestType::PUT,
     ];
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-pub enum Protocol {
-    #[default]
-    HTTP,
-    HTTPS,
-}
-
-impl fmt::Display for Protocol {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Protocol::HTTP => write!(f, "http"),
-            Protocol::HTTPS => write!(f, "https"),
-        }
+    pub fn next(self) -> RequestType {
+        let idx = RequestType::VARIANTS
+            .iter()
+            .position(|&r| r == self)
+            .unwrap();
+        RequestType::VARIANTS[(idx + 1) % RequestType::VARIANTS.len()]
     }
 }
+
 #[derive(Debug, Default)]
 pub struct App {
     pub current_screen: CurrentScreen,
@@ -66,38 +39,24 @@ pub struct App {
     pub protocol: Protocol,
     pub should_quit: bool,
     pub client: Client,
+    pub history: Vec<Request>,
 }
 
 impl App {
     pub fn quit(&mut self) {
         self.should_quit = true;
     }
-    // TODO: save history of the requests
-    // TODO: remove everything that is hardcoded
     // TODO: handler to send a http request
-    // TODO: do the response in json, better response handler
+    // TODO: do the response in json, prettyprint, better response handler
+    // INFO: possible duplication with Request struct and url, request, and protocol
     pub async fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
-        let prepare_request = match self.request_type {
-            RequestType::GET => self.client.get(format!("{}://{}", self.protocol, self.url)),
-            RequestType::POST => self
-                .client
-                .post(format!("{}://{}", self.protocol, self.url)),
-            RequestType::PUT => self.client.put(format!("{}://{}", self.protocol, self.url)),
-            RequestType::PATCH => self
-                .client
-                .patch(format!("{}://{}", self.protocol, self.url)),
-            RequestType::DELETE => self
-                .client
-                .delete(format!("{}://{}", self.protocol, self.url)),
+        let request = Request {
+            protocol: self.protocol,
+            request_type: self.request_type,
+            url: self.url.to_string(),
         };
-        let req = prepare_request.send().await?;
-        self.response = req.text().await?;
-        Ok(())
-    }
-
-    // TODO: maybe use another function to print the response, it panics on a lot of requests
-    pub fn print_json(&self) -> serde_json::Result<()> {
-        println!("hell yeah");
+        self.response = request.send(&self.client).await?;
+        self.history.insert(0, request);
         Ok(())
     }
 }
