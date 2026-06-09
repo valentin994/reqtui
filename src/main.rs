@@ -1,6 +1,7 @@
 pub mod api;
 pub mod app;
 pub mod event;
+pub mod theme;
 pub mod tui;
 pub mod ui;
 pub mod update;

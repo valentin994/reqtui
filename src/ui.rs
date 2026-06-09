@@ -1,12 +1,13 @@
 use ratatui::{
     Frame,
-    layout::{Constraint, Direction, Layout},
-    style::{Color, Modifier, Style},
+    layout::{Constraint, Direction, Flex, Layout},
+    style::{Color, Modifier, Style, Stylize},
     text::{Line, Span, Text},
-    widgets::{Block, Borders, Clear, Paragraph},
+    widgets::{Block, Borders, Clear, Padding, Paragraph},
 };
 
 use crate::app::{App, CurrentScreen};
+use crate::theme::THEME;
 
 // TODO: UI revamp
 // TODO: moduliraze the UI
@@ -17,7 +18,7 @@ use crate::app::{App, CurrentScreen};
 // TODO: color of request type
 
 pub fn render(app: &mut App, frame: &mut Frame) {
-    // Chunks of the area that are going to be displayed
+    // Main chunks of the area that are going to be displayed
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -27,29 +28,30 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         ])
         .split(frame.area());
 
-    let request_contraints = Constraint::from_percentages([10, 90]);
-    let request_layout = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints(request_contraints)
+    let request_layout = Layout::horizontal([Constraint::Length(12), Constraint::Percentage(100)])
+        .flex(Flex::Start)
         .split(chunks[0]);
 
-    let title_block = Block::default()
+    let request_type_block = Block::default()
+        .border_style(THEME.text)
         .borders(Borders::ALL)
-        .style(Style::default());
+        .padding(Padding::horizontal(2));
 
     let protocol_paragraph = Paragraph::new(Text::styled(
         format!("{:?}", app.request_type),
-        Style::default().fg(Color::Green),
+        Style::default().bold().fg(THEME.primary),
     ))
-    .block(title_block);
+    .block(request_type_block);
 
     let url_block = Block::default()
         .borders(Borders::ALL)
+        .padding(Padding::left(1))
+        .border_style(THEME.text)
         .style(Style::default());
 
     let url_paragraph = Paragraph::new(Text::styled(
         format!("{}://{}", app.protocol, app.url),
-        Style::default().fg(Color::Cyan),
+        Style::default().fg(THEME.text),
     ))
     .block(url_block);
 
@@ -64,28 +66,36 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .lines()
         .map(|line| Line::from(line.to_owned()))
         .collect();
-    let response = Paragraph::new(lines).block(Block::default().borders(Borders::ALL));
+    let response = Paragraph::new(lines)
+        .style(Style::default().fg(THEME.text))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_style(THEME.text),
+        );
 
-    let footer_contraints = Constraint::from_percentages([10, 90]);
+    let footer_contraints = Constraint::from_percentages([5, 90]);
     let footer_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(footer_contraints)
         .split(chunks[2]);
 
     let current_navigation_text = match app.current_screen {
-        CurrentScreen::Main => Span::styled("Main", Style::default().fg(Color::Green)),
-        CurrentScreen::Editing => Span::styled("Editing", Style::default().fg(Color::Yellow)),
-        CurrentScreen::History => Span::styled("History", Style::default().fg(Color::Blue)),
+        CurrentScreen::Main => Span::styled("Main", Style::default().fg(THEME.text).bold()),
+        CurrentScreen::Editing => Span::styled("Editing", Style::default().fg(THEME.text).bold()),
+        CurrentScreen::History => Span::styled("History", Style::default().fg(THEME.text).bold()),
     }
     .to_owned();
 
-    let navigation_text_paragraph = Paragraph::new(current_navigation_text).block(Block::default());
+    let navigation_text_paragraph = Paragraph::new(current_navigation_text)
+        .bg(THEME.primary)
+        .block(Block::default().padding(Padding::horizontal(2)));
 
     let current_key_help = {
         match app.current_screen {
             CurrentScreen::Main => Span::styled(
                 "(q) / (esc) quit, (e) edit url, (tab) change request type, (p) change protocol, (enter) send request",
-                Style::default().fg(Color::Red),
+                Style::default().bg(Color::DarkGray).fg(Color::Red),
             ),
             CurrentScreen::Editing => Span::styled(
                 "(esc) cancel, (enter) save value",
@@ -123,7 +133,6 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         let x = app.url.visual_cursor().max(scroll) - scroll + 1;
         frame.set_cursor_position((centered_area.x + x as u16, centered_area.y + 1));
     }
-    // TODO: Loading
     // WARNING: should refactor
     if app.current_screen == CurrentScreen::History {
         let popup_block = Block::bordered().title("Last requests");

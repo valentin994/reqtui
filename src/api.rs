@@ -59,6 +59,7 @@ impl fmt::Display for Request {
 }
 
 // TODO: implement request response or error type
+// TODO: body, query params, and etc
 
 impl Request {
     pub async fn send(&self, client: &Client) -> Result<String, Box<dyn Error>> {

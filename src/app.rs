@@ -35,6 +35,7 @@ impl App {
     // TODO: do the response in json, prettyprint, better response handler
     // INFO: possible duplication with Request struct and url, right now overkill
     // TODO: add logging
+    // TODO: postman collection import
     pub fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
         self.loading = true;
         let request = Request {
