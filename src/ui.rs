@@ -1,6 +1,6 @@
 use ratatui::{
     Frame,
-    layout::{Constraint, Direction, Flex, Layout},
+    layout::{Alignment, Constraint, Direction, Flex, Layout},
     style::{Color, Modifier, Style, Stylize},
     text::{Line, Span, Text},
     widgets::{Block, Borders, Clear, Padding, Paragraph},
@@ -80,16 +80,22 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .constraints(footer_contraints)
         .split(chunks[2]);
 
-    let current_navigation_text = match app.current_screen {
-        CurrentScreen::Main => Span::styled("Main", Style::default().fg(THEME.text).bold()),
-        CurrentScreen::Editing => Span::styled("Editing", Style::default().fg(THEME.text).bold()),
-        CurrentScreen::History => Span::styled("History", Style::default().fg(THEME.text).bold()),
-    }
-    .to_owned();
+    let current_screen_name = app.current_screen.name();
+    let current_screen_color = app.current_screen.color();
 
-    let navigation_text_paragraph = Paragraph::new(current_navigation_text)
-        .bg(THEME.primary)
-        .block(Block::default().padding(Padding::horizontal(2)));
+    let padding: u16 = 2;
+    let content_width = current_screen_name.chars().count() as u16 + padding * 2;
+
+    let [centered] = Layout::horizontal([Constraint::Length(content_width)])
+        .flex(Flex::Center)
+        .areas(footer_layout[0]);
+
+    let nav = Paragraph::new(Span::styled(
+        current_screen_name,
+        Style::default().fg(THEME.text).bold(),
+    ))
+    .alignment(Alignment::Center)
+    .bg(current_screen_color);
 
     let current_key_help = {
         match app.current_screen {
@@ -112,7 +118,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     frame.render_widget(protocol_paragraph, request_layout[0]);
     frame.render_widget(url_paragraph, request_layout[1]);
     frame.render_widget(response, chunks[1]);
-    frame.render_widget(navigation_text_paragraph, footer_layout[0]);
+    frame.render_widget(nav, centered);
     frame.render_widget(current_screen_help, footer_layout[1]);
 
     // WARNING: should refactor, the popup block can be shared

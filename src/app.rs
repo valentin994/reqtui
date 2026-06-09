@@ -1,9 +1,13 @@
+use ratatui::style::Color;
 use reqwest::Client;
 use std::error::Error;
 use tokio::task::JoinHandle;
 use tui_input::Input;
 
-use crate::api::{Protocol, Request, RequestType};
+use crate::{
+    api::{Protocol, Request, RequestType},
+    theme::THEME,
+};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum CurrentScreen {
@@ -11,6 +15,24 @@ pub enum CurrentScreen {
     Main,
     Editing,
     History,
+}
+
+impl CurrentScreen {
+    pub fn name(self) -> &'static str {
+        match self {
+            CurrentScreen::Main => "Main",
+            CurrentScreen::Editing => "Editing",
+            CurrentScreen::History => "History",
+        }
+    }
+
+    pub fn color(self) -> Color {
+        match self {
+            CurrentScreen::Main => THEME.primary,
+            CurrentScreen::Editing => THEME.error,
+            CurrentScreen::History => THEME.success,
+        }
+    }
 }
 
 #[derive(Debug, Default)]
