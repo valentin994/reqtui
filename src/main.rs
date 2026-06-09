@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let backend = CrosstermBackend::new(io::stderr());
     let terminal = Terminal::new(backend)?;
-    let events = EventHandler::new(250);
+    let events = EventHandler::new(100);
 
     // create app and run it
     let mut tui = Tui::new(terminal, events);
@@ -31,7 +31,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         tui.draw(&mut app)?;
 
         match tui.events.next()? {
-            Event::Tick => {}
+            Event::Tick => {
+                if app.loading {
+                    app.throbber_state.calc_next();
+                }
+                app.poll_requests();
+            }
             Event::Key(key_event) => update(&mut app, key_event).await,
             Event::Mouse(_) => {}
             Event::Resize(_, _) => {}

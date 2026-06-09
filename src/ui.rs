@@ -1,7 +1,7 @@
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout},
-    style::{Color, Style},
+    style::{Color, Modifier, Style},
     text::{Line, Span, Text},
     widgets::{Block, Borders, Clear, Paragraph},
 };
@@ -14,6 +14,7 @@ use crate::app::{App, CurrentScreen};
 // TODO: scrollbar for response part
 // TODO: use a theme
 // TODO: update footer with flex layout
+// TODO: color of request type
 
 pub fn render(app: &mut App, frame: &mut Frame) {
     // Chunks of the area that are going to be displayed
@@ -122,12 +123,13 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         let x = app.url.visual_cursor().max(scroll) - scroll + 1;
         frame.set_cursor_position((centered_area.x + x as u16, centered_area.y + 1));
     }
+    // TODO: Loading
     // WARNING: should refactor
     if app.current_screen == CurrentScreen::History {
         let popup_block = Block::bordered().title("Last requests");
         let centered_area = frame
             .area()
-            .centered(Constraint::Percentage(60), Constraint::Percentage(20));
+            .centered(Constraint::Percentage(60), Constraint::Percentage(60));
         frame.render_widget(Clear, centered_area);
 
         let width = centered_area.width.max(3) - 3;
@@ -138,5 +140,21 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             .scroll((0, scroll as u16))
             .block(popup_block);
         frame.render_widget(paragraph, centered_area);
+    }
+
+    if app.loading {
+        let loading_widget = throbber_widgets_tui::Throbber::default()
+            .label("Sending request to")
+            .style(Style::default().fg(Color::Cyan))
+            .throbber_style(Style::default().fg(Color::Red).add_modifier(Modifier::BOLD))
+            .throbber_set(throbber_widgets_tui::BRAILLE_SIX);
+
+        let area = frame
+            .area()
+            .centered(Constraint::Percentage(50), Constraint::Length(3));
+        let popup = Paragraph::new(format!("{}", app.url)).block(Block::bordered());
+        frame.render_widget(Clear, area);
+        frame.render_widget(popup, area);
+        frame.render_stateful_widget(loading_widget, area, &mut app.throbber_state);
     }
 }

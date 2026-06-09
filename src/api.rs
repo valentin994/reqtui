@@ -1,4 +1,4 @@
-use std::{error::Error, fmt};
+use std::{error::Error, fmt, time::Duration};
 
 use reqwest::Client;
 
@@ -10,6 +10,23 @@ pub enum RequestType {
     DELETE,
     PATCH,
     PUT,
+}
+
+impl RequestType {
+    const VARIANTS: [RequestType; 5] = [
+        RequestType::GET,
+        RequestType::POST,
+        RequestType::DELETE,
+        RequestType::PATCH,
+        RequestType::PUT,
+    ];
+    pub fn next(self) -> RequestType {
+        let idx = RequestType::VARIANTS
+            .iter()
+            .position(|&r| r == self)
+            .unwrap();
+        RequestType::VARIANTS[(idx + 1) % RequestType::VARIANTS.len()]
+    }
 }
 
 #[derive(Debug, Hash, Default, Clone, Copy, PartialEq, Eq)]
@@ -28,7 +45,7 @@ impl fmt::Display for Protocol {
     }
 }
 
-#[derive(Eq, Debug, PartialEq)]
+#[derive(Eq, Debug, PartialEq, Clone)]
 pub struct Request {
     pub protocol: Protocol,
     pub request_type: RequestType,
@@ -41,6 +58,8 @@ impl fmt::Display for Request {
     }
 }
 
+// TODO: implement request response or error type
+
 impl Request {
     pub async fn send(&self, client: &Client) -> Result<String, Box<dyn Error>> {
         let prepare_request = match self.request_type {
@@ -50,7 +69,10 @@ impl Request {
             RequestType::PATCH => client.patch(format!("{}://{}", self.protocol, self.url)),
             RequestType::DELETE => client.delete(format!("{}://{}", self.protocol, self.url)),
         };
-        let req = prepare_request.send().await?;
-        Ok(req.text().await?)
+        match prepare_request.timeout(Duration::from_secs(4)).send().await {
+            Ok(resp) => Ok(resp.text().await?),
+            Err(e) if e.is_timeout() => Ok("timeout".to_string()),
+            Err(e) => Err(Box::new(e)),
+        }
     }
 }

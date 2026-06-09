@@ -1,6 +1,6 @@
-use std::error::Error;
-
 use reqwest::Client;
+use std::error::Error;
+use tokio::task::JoinHandle;
 use tui_input::Input;
 
 use crate::api::{Protocol, Request, RequestType};
@@ -13,23 +13,6 @@ pub enum CurrentScreen {
     History,
 }
 
-impl RequestType {
-    const VARIANTS: [RequestType; 5] = [
-        RequestType::GET,
-        RequestType::POST,
-        RequestType::DELETE,
-        RequestType::PATCH,
-        RequestType::PUT,
-    ];
-    pub fn next(self) -> RequestType {
-        let idx = RequestType::VARIANTS
-            .iter()
-            .position(|&r| r == self)
-            .unwrap();
-        RequestType::VARIANTS[(idx + 1) % RequestType::VARIANTS.len()]
-    }
-}
-
 #[derive(Debug, Default)]
 pub struct App {
     pub current_screen: CurrentScreen,
@@ -40,23 +23,50 @@ pub struct App {
     pub should_quit: bool,
     pub client: Client,
     pub history: Vec<Request>,
+    pub throbber_state: throbber_widgets_tui::ThrobberState,
+    pub loading: bool,
+    pub pending_tasks: Option<JoinHandle<Result<String, String>>>,
 }
 
 impl App {
     pub fn quit(&mut self) {
         self.should_quit = true;
     }
-    // TODO: handler to send a http request
     // TODO: do the response in json, prettyprint, better response handler
-    // INFO: possible duplication with Request struct and url, request, and protocol
-    pub async fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
+    // INFO: possible duplication with Request struct and url, right now overkill
+    // TODO: add logging
+    pub fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
+        self.loading = true;
         let request = Request {
             protocol: self.protocol,
             request_type: self.request_type,
             url: self.url.to_string(),
         };
-        self.response = request.send(&self.client).await?;
-        self.history.insert(0, request);
+        let client = self.client.clone();
+        self.history.insert(0, request.clone());
+        self.pending_tasks = Some(tokio::spawn(async move {
+            request.send(&client).await.map_err(|e| e.to_string())
+        }));
         Ok(())
     }
+
+    pub fn poll_requests(&mut self) {
+        let finished = self
+            .pending_tasks
+            .as_ref()
+            .map(|f| f.is_finished())
+            .unwrap_or(false);
+
+        if finished {
+            let handle = self.pending_tasks.take().unwrap();
+
+            match futures::executor::block_on(handle) {
+                Ok(Ok(body)) => self.response = body,
+                Ok(Err(e)) => self.response = e,
+                Err(_) => self.response = "Request couldn't be executed".to_string(),
+            }
+            self.loading = false;
+        }
+    }
+    // TODO: load testing feature
 }

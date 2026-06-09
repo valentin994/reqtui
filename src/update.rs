@@ -9,7 +9,7 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
         CurrentScreen::Main => match key_event.code {
             KeyCode::Esc | KeyCode::Char('q') => app.quit(),
             KeyCode::Char('e') => app.current_screen = CurrentScreen::Editing,
-            KeyCode::Char(' ') => app.current_screen = CurrentScreen::History,
+            KeyCode::Char('h') => app.current_screen = CurrentScreen::History,
             // INFO:if I implement more protocols see RequestType iterator example for cycling
             KeyCode::Char('p') => {
                 app.protocol = match app.protocol {
@@ -18,10 +18,7 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
                 }
             }
             KeyCode::Tab => app.request_type = app.request_type.next(),
-            KeyCode::Enter => {
-                // TODO: Loading text, sometime animation
-                app.send_request().await.expect("Failed to fetch")
-            }
+            KeyCode::Enter => app.send_request().expect("failed to send request"),
             _ => {}
         },
         CurrentScreen::Editing => match key_event.code {
