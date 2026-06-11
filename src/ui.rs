@@ -128,7 +128,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         let x = app.url.visual_cursor().max(scroll) - scroll + 1;
         frame.set_cursor_position((centered_area.x + x as u16, centered_area.y + 1));
     }
-    // TODO: change to list view
+    // TODO: make a new input field in history for search
     if app.current_screen == CurrentScreen::History {
         let centered_area = frame
             .area()
@@ -139,14 +139,15 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             app.history_state.select(Some(0));
         }
 
-        let lines: Vec<String> = app.history.iter().map(|req| format!("{:?}", req)).collect();
+        let lines: Vec<String> = app.history.iter().map(|req| format!("{}", req)).collect();
         let history_list = List::new(lines)
             .block(
                 Block::default()
                     .border_style(THEME.text)
                     .borders(Borders::ALL),
             )
-            .highlight_style(Style::default())
+            .style(THEME.text)
+            .highlight_style(Modifier::REVERSED)
             .highlight_symbol("> ");
         frame.render_stateful_widget(history_list, centered_area, &mut app.history_state);
     }
