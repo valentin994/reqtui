@@ -123,6 +123,7 @@ impl App {
         self.url = Input::new(req.url);
         self.protocol = req.protocol;
         self.request_type = req.request_type;
+        self.body = TextArea::from(req.body.lines());
     }
 
     pub fn selected_request(&mut self) -> Option<&Request> {
