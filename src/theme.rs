@@ -1,5 +1,5 @@
 use ratatui::style::Color;
-use ratatui::style::palette::tailwind::{GRAY, GREEN, INDIGO, RED};
+use ratatui::style::palette::tailwind::{EMERALD, GRAY, GREEN, INDIGO, RED};
 
 #[derive(Default)]
 pub struct Theme {
@@ -12,7 +12,7 @@ pub struct Theme {
 
 pub const THEME: Theme = Theme {
     primary: INDIGO.c600,
-    secondary: GRAY.c600,
+    secondary: EMERALD.c600,
     text: GRAY.c200,
     error: RED.c600,
     success: GREEN.c600,

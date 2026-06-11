@@ -3,7 +3,7 @@ use ratatui::{
     layout::{Alignment, Constraint, Direction, Flex, Layout},
     style::{Color, Modifier, Style, Stylize},
     text::{Line, Span, Text},
-    widgets::{Block, Borders, Clear, Padding, Paragraph},
+    widgets::{Block, Borders, Clear, List, Padding, Paragraph},
 };
 
 use crate::app::{App, CurrentScreen};
@@ -39,7 +39,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     let protocol_paragraph = Paragraph::new(Text::styled(
         format!("{:?}", app.request_type),
-        Style::default().bold().fg(THEME.primary),
+        Style::default().bold().fg(THEME.secondary),
     ))
     .block(request_type_block);
 
@@ -74,19 +74,16 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                 .border_style(THEME.text),
         );
 
-    let footer_contraints = Constraint::from_percentages([5, 90]);
     let footer_layout = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints(footer_contraints)
+        .constraints([Constraint::Length(12), Constraint::Percentage(100)])
         .split(chunks[2]);
 
     let current_screen_name = app.current_screen.name();
     let current_screen_color = app.current_screen.color();
+    let current_screen_help = app.current_screen.help();
 
-    let padding: u16 = 2;
-    let content_width = current_screen_name.chars().count() as u16 + padding * 2;
-
-    let [centered] = Layout::horizontal([Constraint::Length(content_width)])
+    let [centered] = Layout::horizontal([Constraint::Length(12)])
         .flex(Flex::Center)
         .areas(footer_layout[0]);
 
@@ -97,23 +94,12 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     .alignment(Alignment::Center)
     .bg(current_screen_color);
 
-    let current_key_help = {
-        match app.current_screen {
-            CurrentScreen::Main => Span::styled(
-                "(q) / (esc) quit, (e) edit url, (tab) change request type, (p) change protocol, (enter) send request",
-                Style::default().bg(Color::DarkGray).fg(Color::Red),
-            ),
-            CurrentScreen::Editing => Span::styled(
-                "(esc) cancel, (enter) save value",
-                Style::default().fg(Color::Red),
-            ),
-            CurrentScreen::History => {
-                Span::styled("(esc) cancel, (q) quit", Style::default().fg(Color::Red))
-            }
-        }
-    };
-
-    let current_screen_help = Paragraph::new(Line::from(current_key_help)).block(Block::default());
+    // TODO: do the shadowing to other variables as well, like current_screen_help
+    let current_screen_help = Paragraph::new(Line::from(current_screen_help)).block(
+        Block::default()
+            .bg(THEME.secondary)
+            .padding(Padding::left(2)),
+    );
 
     frame.render_widget(protocol_paragraph, request_layout[0]);
     frame.render_widget(url_paragraph, request_layout[1]);
@@ -123,10 +109,13 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     // WARNING: should refactor, the popup block can be shared
     if app.current_screen == CurrentScreen::Editing {
-        let popup_block = Block::bordered().title("Enter URL");
+        let popup_block = Block::bordered()
+            .title("Enter URL")
+            .border_style(THEME.text);
+
         let centered_area = frame
             .area()
-            .centered(Constraint::Percentage(60), Constraint::Percentage(20));
+            .centered(Constraint::Percentage(60), Constraint::Length(3));
         frame.render_widget(Clear, centered_area);
 
         let width = centered_area.width.max(3) - 3;
@@ -139,22 +128,27 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         let x = app.url.visual_cursor().max(scroll) - scroll + 1;
         frame.set_cursor_position((centered_area.x + x as u16, centered_area.y + 1));
     }
-    // WARNING: should refactor
+    // TODO: change to list view
     if app.current_screen == CurrentScreen::History {
-        let popup_block = Block::bordered().title("Last requests");
         let centered_area = frame
             .area()
             .centered(Constraint::Percentage(60), Constraint::Percentage(60));
         frame.render_widget(Clear, centered_area);
 
-        let width = centered_area.width.max(3) - 3;
-        let scroll = app.url.visual_scroll(width as usize);
-        // clears out any background in the area before rendering the popup
+        if !app.history.is_empty() && app.history_state.selected().is_none() {
+            app.history_state.select(Some(0));
+        }
+
         let lines: Vec<String> = app.history.iter().map(|req| format!("{:?}", req)).collect();
-        let paragraph = Paragraph::new(lines.join("\n"))
-            .scroll((0, scroll as u16))
-            .block(popup_block);
-        frame.render_widget(paragraph, centered_area);
+        let history_list = List::new(lines)
+            .block(
+                Block::default()
+                    .border_style(THEME.text)
+                    .borders(Borders::ALL),
+            )
+            .highlight_style(Style::default())
+            .highlight_symbol("> ");
+        frame.render_stateful_widget(history_list, centered_area, &mut app.history_state);
     }
 
     if app.loading {

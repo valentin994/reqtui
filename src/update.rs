@@ -31,6 +31,12 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
         CurrentScreen::History => match key_event.code {
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,
             KeyCode::Char('q') => app.quit(),
+            KeyCode::Up | KeyCode::Char('k') => app.history_state.select_previous(),
+            KeyCode::Down | KeyCode::Char('j') => app.history_state.select_next(),
+            KeyCode::Enter => {
+                app.set_request();
+                app.current_screen = CurrentScreen::Main;
+            }
             _ => {}
         },
     }
