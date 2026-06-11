@@ -1,9 +1,8 @@
 use ratatui::crossterm::event::{Event, KeyCode, KeyEvent};
-use ratatui::style::Stylize;
 use tui_input::backend::crossterm::EventHandler;
 
 use crate::api::Protocol;
-use crate::app::{App, CurrentScreen};
+use crate::app::{ActiveEditField, App, CurrentScreen};
 
 pub async fn update(app: &mut App, key_event: KeyEvent) {
     match app.current_screen {
@@ -30,10 +29,16 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
         },
         CurrentScreen::Editing => match key_event.code {
             // TODO: on escape don't save URL
+            KeyCode::Tab => app.toggle_active_field(),
             KeyCode::Esc | KeyCode::Enter => app.current_screen = CurrentScreen::Main,
-            _ => {
-                app.url.handle_event(&Event::Key(key_event));
-            }
+            _ => match app.active_edit_field {
+                ActiveEditField::Url => {
+                    app.url.handle_event(&Event::Key(key_event));
+                }
+                ActiveEditField::Body => {
+                    app.body.input(key_event);
+                }
+            },
         },
         CurrentScreen::History => match key_event.code {
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,

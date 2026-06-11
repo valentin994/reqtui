@@ -1,4 +1,5 @@
 use ratatui::{style::Color, widgets::ListState};
+use ratatui_textarea::TextArea;
 use reqwest::Client;
 use std::error::Error;
 use tokio::task::JoinHandle;
@@ -46,6 +47,13 @@ impl CurrentScreen {
     }
 }
 
+#[derive(Debug, Default, PartialEq)]
+pub enum ActiveEditField {
+    #[default]
+    Url,
+    Body,
+}
+
 #[derive(Debug, Default)]
 pub struct App {
     pub current_screen: CurrentScreen,
@@ -53,6 +61,8 @@ pub struct App {
     pub response: String,
     pub request_type: RequestType,
     pub protocol: Protocol,
+    pub body: TextArea<'static>,
+    pub active_edit_field: ActiveEditField,
     pub should_quit: bool,
     pub client: Client,
     pub history: Vec<Request>,
@@ -77,6 +87,7 @@ impl App {
             protocol: self.protocol,
             request_type: self.request_type,
             url: self.url.to_string(),
+            body: self.body.lines().join("\n"),
         };
         let client = self.client.clone();
         self.history.insert(0, request.clone());
@@ -118,6 +129,13 @@ impl App {
         self.history_state
             .selected()
             .and_then(|i| self.history.get(i))
+    }
+
+    pub fn toggle_active_field(&mut self) {
+        match self.active_edit_field {
+            ActiveEditField::Url => self.active_edit_field = ActiveEditField::Body,
+            ActiveEditField::Body => self.active_edit_field = ActiveEditField::Url,
+        }
     }
     // TODO: load testing feature
 }

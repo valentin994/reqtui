@@ -50,6 +50,7 @@ pub struct Request {
     pub protocol: Protocol,
     pub request_type: RequestType,
     pub url: String,
+    pub body: String,
 }
 
 impl fmt::Display for Request {
@@ -69,9 +70,15 @@ impl Request {
     pub async fn send(&self, client: &Client) -> Result<String, Box<dyn Error>> {
         let prepare_request = match self.request_type {
             RequestType::GET => client.get(format!("{}://{}", self.protocol, self.url)),
-            RequestType::POST => client.post(format!("{}://{}", self.protocol, self.url)),
-            RequestType::PUT => client.put(format!("{}://{}", self.protocol, self.url)),
-            RequestType::PATCH => client.patch(format!("{}://{}", self.protocol, self.url)),
+            RequestType::POST => client
+                .post(format!("{}://{}", self.protocol, self.url))
+                .body(self.body.clone()),
+            RequestType::PUT => client
+                .put(format!("{}://{}", self.protocol, self.url))
+                .body(self.body.clone()),
+            RequestType::PATCH => client
+                .patch(format!("{}://{}", self.protocol, self.url))
+                .body(self.body.clone()),
             RequestType::DELETE => client.delete(format!("{}://{}", self.protocol, self.url)),
         };
         match prepare_request.timeout(Duration::from_secs(4)).send().await {

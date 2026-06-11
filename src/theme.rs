@@ -6,6 +6,7 @@ pub struct Theme {
     pub primary: Color,
     pub secondary: Color,
     pub text: Color,
+    pub background: Color,
     pub error: Color,
     pub success: Color,
 }
@@ -14,6 +15,7 @@ pub const THEME: Theme = Theme {
     primary: INDIGO.c600,
     secondary: EMERALD.c600,
     text: GRAY.c200,
+    background: GRAY.c500,
     error: RED.c600,
     success: GREEN.c600,
 };

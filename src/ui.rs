@@ -6,7 +6,7 @@ use ratatui::{
     widgets::{Block, Borders, Clear, List, Padding, Paragraph},
 };
 
-use crate::app::{App, CurrentScreen};
+use crate::app::{ActiveEditField, App, CurrentScreen};
 use crate::theme::THEME;
 
 // TODO: UI revamp
@@ -106,26 +106,61 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     frame.render_widget(nav, centered);
     frame.render_widget(current_screen_help, footer_layout[1]);
 
-    // WARNING: should refactor, the popup block can be shared
     if app.current_screen == CurrentScreen::Editing {
-        let popup_block = Block::bordered()
-            .title("Enter URL")
-            .border_style(THEME.text);
+        let url_focus = app.active_edit_field == ActiveEditField::Url;
 
         let centered_area = frame
             .area()
-            .centered(Constraint::Percentage(60), Constraint::Length(3));
+            .centered(Constraint::Percentage(60), Constraint::Percentage(80));
+
+        let editing_layout = Layout::vertical([Constraint::Length(3), Constraint::Min(3)])
+            .flex(Flex::Start)
+            .split(centered_area);
+
+        let url_block = Block::bordered()
+            .title("Enter URL")
+            .border_style(if url_focus {
+                THEME.text
+            } else {
+                THEME.background
+            });
+
         frame.render_widget(Clear, centered_area);
+        if url_focus {
+            app.body.set_cursor_style(Style::default());
+        } else {
+            app.body
+                .set_cursor_style(Style::default().add_modifier(Modifier::REVERSED));
+        }
+        app.body.set_line_number_style(Style::default());
+        app.body.set_block(
+            Block::bordered()
+                .style(if url_focus {
+                    THEME.background
+                } else {
+                    THEME.text
+                })
+                .title("Body".to_string()),
+        );
 
         let width = centered_area.width.max(3) - 3;
         let scroll = app.url.visual_scroll(width as usize);
-        // clears out any background in the area before rendering the popup
         let paragraph = Paragraph::new(app.url.value())
             .scroll((0, scroll as u16))
-            .block(popup_block);
-        frame.render_widget(paragraph, centered_area);
-        let x = app.url.visual_cursor().max(scroll) - scroll + 1;
-        frame.set_cursor_position((centered_area.x + x as u16, centered_area.y + 1));
+            .style(if url_focus {
+                THEME.text
+            } else {
+                THEME.background
+            })
+            .block(url_block);
+        frame.render_widget(paragraph, editing_layout[0]);
+
+        if url_focus {
+            let x = app.url.visual_cursor().max(scroll) - scroll + 1;
+            frame.set_cursor_position((editing_layout[0].x + x as u16, editing_layout[0].y + 1));
+        }
+
+        frame.render_widget(&app.body, editing_layout[1]);
     }
     // TODO: make a new input field in history for search
     // TODO: if the url is not correct make the border red
