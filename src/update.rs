@@ -1,4 +1,5 @@
 use ratatui::crossterm::event::{Event, KeyCode, KeyEvent};
+use ratatui::style::Stylize;
 use tui_input::backend::crossterm::EventHandler;
 
 use crate::api::Protocol;
@@ -16,6 +17,12 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
                     Protocol::HTTP => Protocol::HTTPS,
                     Protocol::HTTPS => Protocol::HTTP,
                 }
+            }
+            KeyCode::Up | KeyCode::Char('k') => {
+                app.scroll_response = app.scroll_response.saturating_sub(1)
+            }
+            KeyCode::Down | KeyCode::Char('j') => {
+                app.scroll_response = app.scroll_response.saturating_add(1)
             }
             KeyCode::Tab => app.request_type = app.request_type.next(),
             KeyCode::Enter => app.send_request().expect("failed to send request"),

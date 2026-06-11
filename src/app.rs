@@ -60,6 +60,7 @@ pub struct App {
     pub throbber_state: throbber_widgets_tui::ThrobberState,
     pub loading: bool,
     pub pending_tasks: Option<JoinHandle<Result<String, String>>>,
+    pub scroll_response: u16,
 }
 
 impl App {

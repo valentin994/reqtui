@@ -56,7 +56,7 @@ impl fmt::Display for Request {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{:?} {}://{}",
+            "{:?}| {}://{}",
             self.request_type, self.protocol, self.url
         )
     }

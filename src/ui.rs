@@ -55,9 +55,6 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     ))
     .block(url_block);
 
-    // WARNING: not sure how to keep this, should the app.response be other type than string?
-    // maybe there should be a part where you can select your data type and parse pased on that,
-    // like key value view, idk
     let pretty_json = serde_json::from_str::<serde_json::Value>(&app.response)
         .map(|v| serde_json::to_string_pretty(&v).unwrap())
         .unwrap_or_else(|_| app.response.clone()); // fallback to raw if not valid JSON
@@ -66,13 +63,15 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .lines()
         .map(|line| Line::from(line.to_owned()))
         .collect();
+
     let response = Paragraph::new(lines)
         .style(Style::default().fg(THEME.text))
         .block(
             Block::default()
                 .borders(Borders::ALL)
                 .border_style(THEME.text),
-        );
+        )
+        .scroll((app.scroll_response, 0));
 
     let footer_layout = Layout::default()
         .direction(Direction::Horizontal)
@@ -129,6 +128,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         frame.set_cursor_position((centered_area.x + x as u16, centered_area.y + 1));
     }
     // TODO: make a new input field in history for search
+    // TODO: if the url is not correct make the border red
     if app.current_screen == CurrentScreen::History {
         let centered_area = frame
             .area()
