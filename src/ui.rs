@@ -12,9 +12,6 @@ use crate::theme::THEME;
 // TODO: UI revamp
 // TODO: moduliraze the UI
 // TODO: new layout
-// TODO: scrollbar for response part
-// TODO: use a theme
-// TODO: update footer with flex layout
 // TODO: color of request type
 
 pub fn render(app: &mut App, frame: &mut Frame) {
@@ -37,9 +34,11 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .borders(Borders::ALL)
         .padding(Padding::horizontal(2));
 
-    let protocol_paragraph = Paragraph::new(Text::styled(
+    let request_type_paragraph = Paragraph::new(Text::styled(
         format!("{:?}", app.request_type),
-        Style::default().bold().fg(THEME.secondary),
+        Style::default()
+            .bold()
+            .fg(THEME.derive_request(app.request_type)),
     ))
     .block(request_type_block);
 
@@ -100,7 +99,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             .padding(Padding::left(2)),
     );
 
-    frame.render_widget(protocol_paragraph, request_layout[0]);
+    frame.render_widget(request_type_paragraph, request_layout[0]);
     frame.render_widget(url_paragraph, request_layout[1]);
     frame.render_widget(response, chunks[1]);
     frame.render_widget(nav, centered);

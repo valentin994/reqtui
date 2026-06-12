@@ -1,5 +1,7 @@
 use ratatui::style::Color;
-use ratatui::style::palette::tailwind::{EMERALD, GRAY, GREEN, INDIGO, RED};
+use ratatui::style::palette::tailwind::{BLUE, EMERALD, GRAY, GREEN, INDIGO, RED};
+
+use crate::api::RequestType;
 
 #[derive(Default)]
 pub struct Theme {
@@ -9,6 +11,25 @@ pub struct Theme {
     pub background: Color,
     pub error: Color,
     pub success: Color,
+
+    // Requests Type Colors
+    pub get: Color,
+    pub post: Color,
+    pub delete: Color,
+    pub patch: Color,
+    pub put: Color,
+}
+
+impl Theme {
+    pub fn derive_request(&self, request: RequestType) -> Color {
+        match request {
+            RequestType::GET => self.get,
+            RequestType::POST => self.post,
+            RequestType::DELETE => self.delete,
+            RequestType::PATCH => self.patch,
+            RequestType::PUT => self.put,
+        }
+    }
 }
 
 pub const THEME: Theme = Theme {
@@ -18,4 +39,10 @@ pub const THEME: Theme = Theme {
     background: GRAY.c500,
     error: RED.c600,
     success: GREEN.c600,
+
+    get: BLUE.c300,
+    post: EMERALD.c300,
+    delete: RED.c300,
+    patch: INDIGO.c300,
+    put: GREEN.c300,
 };
