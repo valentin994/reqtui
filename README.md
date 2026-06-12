@@ -4,6 +4,8 @@ A postman tui clone that is being built for me to detox from the AI hype.
 Pure, handwritten code. Would an LLM write this faster and better, yeap most likely.
 Do I care, absolutely not.
 
+<img width="1830" height="627" alt="demo" src="https://github.com/user-attachments/assets/a1835c8d-0ca1-4c68-8063-17519840b252" />
+
 ## Features
 
 - Send HTTP requests: **GET, POST, PUT, PATCH, DELETE**
