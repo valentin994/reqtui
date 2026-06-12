@@ -1,6 +1,6 @@
 use std::{error::Error, fmt, time::Duration};
 
-use reqwest::Client;
+use reqwest::{Client, header::CONTENT_TYPE};
 
 #[derive(Debug, Default, Hash, Clone, Copy, PartialEq, Eq)]
 pub enum RequestType {
@@ -72,13 +72,16 @@ impl Request {
             RequestType::GET => client.get(format!("{}://{}", self.protocol, self.url)),
             RequestType::POST => client
                 .post(format!("{}://{}", self.protocol, self.url))
-                .body(self.body.clone()),
+                .body(self.body.clone())
+                .header(CONTENT_TYPE, "application/json"),
             RequestType::PUT => client
                 .put(format!("{}://{}", self.protocol, self.url))
-                .body(self.body.clone()),
+                .body(self.body.clone())
+                .header(CONTENT_TYPE, "application/json"),
             RequestType::PATCH => client
                 .patch(format!("{}://{}", self.protocol, self.url))
-                .body(self.body.clone()),
+                .body(self.body.clone())
+                .header(CONTENT_TYPE, "application/json"),
             RequestType::DELETE => client.delete(format!("{}://{}", self.protocol, self.url)),
         };
         match prepare_request.timeout(Duration::from_secs(4)).send().await {
