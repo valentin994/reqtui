@@ -108,8 +108,11 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .map(|v| serde_json::to_string_pretty(&v).unwrap())
         .unwrap_or_else(|_| "Invalid json".to_string()); // fallback to raw if not valid JSON
 
-    let parsed_json_paragraph = Paragraph::new(format!("Body:\n\n{parsed_body}"))
-        .block(Block::default().borders(Borders::ALL).style(THEME.text));
+    let parsed_json_paragraph = Paragraph::new(format!("Body:\n\n{parsed_body}")).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .style(THEME.derive_body(app.request_type)),
+    );
 
     frame.render_widget(request_type_paragraph, request_layout[0]);
     frame.render_widget(url_paragraph, request_layout[1]);

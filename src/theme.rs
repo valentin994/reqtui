@@ -30,6 +30,13 @@ impl Theme {
             RequestType::PUT => self.put,
         }
     }
+
+    pub fn derive_body(&self, request: RequestType) -> Color {
+        match request {
+            RequestType::GET | RequestType::DELETE => self.background,
+            RequestType::PUT | RequestType::PATCH | RequestType::POST => self.text,
+        }
+    }
 }
 
 pub const THEME: Theme = Theme {
