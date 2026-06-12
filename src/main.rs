@@ -18,7 +18,7 @@ use crate::app::App;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // setup terminal
-    let mut app = App::default();
+    let mut app = App::new();
 
     let backend = CrosstermBackend::new(io::stderr());
     let terminal = Terminal::new(backend)?;

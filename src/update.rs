@@ -1,4 +1,4 @@
-use ratatui::crossterm::event::{Event, KeyCode, KeyEvent};
+use ratatui::crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use tui_input::backend::crossterm::EventHandler;
 
 use crate::api::Protocol;
@@ -30,7 +30,10 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
         CurrentScreen::Editing => match key_event.code {
             // TODO: on escape don't save URL
             KeyCode::Tab => app.toggle_active_field(),
-            KeyCode::Esc | KeyCode::Enter => app.current_screen = CurrentScreen::Main,
+            KeyCode::Esc => app.current_screen = CurrentScreen::Main,
+            KeyCode::Char('s') if key_event.modifiers.contains(KeyModifiers::ALT) => {
+                app.current_screen = CurrentScreen::Main
+            }
             _ => match app.active_edit_field {
                 ActiveEditField::Url => {
                     app.url.handle_event(&Event::Key(key_event));

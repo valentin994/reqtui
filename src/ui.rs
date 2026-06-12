@@ -5,6 +5,7 @@ use ratatui::{
     text::{Line, Span, Text},
     widgets::{Block, Borders, Clear, List, Padding, Paragraph},
 };
+use ratatui_textarea::WrapMode;
 
 use crate::app::{ActiveEditField, App, CurrentScreen};
 use crate::theme::THEME;
@@ -28,6 +29,10 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let request_layout = Layout::horizontal([Constraint::Length(12), Constraint::Percentage(100)])
         .flex(Flex::Start)
         .split(chunks[0]);
+
+    let response_layout = Layout::horizontal([Constraint::Percentage(100), Constraint::Length(30)])
+        .flex(Flex::Start)
+        .split(chunks[1]);
 
     let request_type_block = Block::default()
         .border_style(THEME.text)
@@ -99,9 +104,17 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             .padding(Padding::left(2)),
     );
 
+    let parsed_body = serde_json::from_str::<serde_json::Value>(&app.body.lines().join("\n"))
+        .map(|v| serde_json::to_string_pretty(&v).unwrap())
+        .unwrap_or_else(|_| "Invalid json".to_string()); // fallback to raw if not valid JSON
+
+    let parsed_json_paragraph = Paragraph::new(format!("Body:\n\n{parsed_body}"))
+        .block(Block::default().borders(Borders::ALL).style(THEME.text));
+
     frame.render_widget(request_type_paragraph, request_layout[0]);
     frame.render_widget(url_paragraph, request_layout[1]);
-    frame.render_widget(response, chunks[1]);
+    frame.render_widget(response, response_layout[0]);
+    frame.render_widget(parsed_json_paragraph, response_layout[1]);
     frame.render_widget(nav, centered);
     frame.render_widget(current_screen_help, footer_layout[1]);
 
@@ -124,6 +137,8 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                 THEME.background
             });
 
+        app.body.set_line_number_style(Style::default());
+        app.body.set_wrap_mode(WrapMode::Word);
         frame.render_widget(Clear, centered_area);
         if url_focus {
             app.body.set_cursor_style(Style::default());
@@ -131,7 +146,6 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             app.body
                 .set_cursor_style(Style::default().add_modifier(Modifier::REVERSED));
         }
-        app.body.set_line_number_style(Style::default());
         app.body.set_block(
             Block::bordered()
                 .style(if url_focus {

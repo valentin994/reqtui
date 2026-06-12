@@ -41,7 +41,7 @@ impl CurrentScreen {
             CurrentScreen::Main => {
                 "(q) / (esc) quit, (e) edit url, (tab) change request type, (p) change protocol, (enter) send request"
             }
-            CurrentScreen::Editing => "(esc) cancel, (enter) save value",
+            CurrentScreen::Editing => "(esc) / (alt + s) save value",
             CurrentScreen::History => "(esc) cancel, (q) quit",
         }
     }
@@ -74,10 +74,15 @@ pub struct App {
 }
 
 impl App {
+    pub fn new() -> Self {
+        App {
+            body: TextArea::from(vec!["{}".to_string()]),
+            ..Default::default()
+        }
+    }
     pub fn quit(&mut self) {
         self.should_quit = true;
     }
-    // TODO: do the response in json, prettyprint, better response handler
     // INFO: possible duplication with Request struct and url, right now overkill
     // TODO: add logging
     // TODO: postman collection import
