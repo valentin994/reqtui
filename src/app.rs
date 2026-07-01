@@ -57,11 +57,11 @@ pub enum ActiveEditField {
     Body,
 }
 
-// TODO: save the requests into a file
-// TODO: update the history so it doesn't get duplicated entries
 // TODO: file search for postman collections
 // TODO: change up the hotkeys and way of selecting request type
 
+// TODO write to json
+// TODO make it possible to select collections
 #[derive(Debug, Default)]
 pub struct CollectionStore {
     collections: Vec<Collection>,
