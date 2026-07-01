@@ -1,8 +1,9 @@
 use std::{error::Error, fmt, time::Duration};
 
 use reqwest::{Client, header::CONTENT_TYPE};
+use serde::Deserialize;
 
-#[derive(Debug, Default, Hash, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Deserialize, Default, Hash, Clone, Copy, PartialEq, Eq)]
 pub enum RequestType {
     #[default]
     GET,
@@ -29,7 +30,7 @@ impl RequestType {
     }
 }
 
-#[derive(Debug, Hash, Default, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Hash, Default, Clone, Copy, PartialEq, Eq, Deserialize)]
 pub enum Protocol {
     #[default]
     HTTP,
@@ -45,7 +46,7 @@ impl fmt::Display for Protocol {
     }
 }
 
-#[derive(Hash, Eq, Debug, PartialEq, Clone)]
+#[derive(Hash, Eq, Debug, PartialEq, Clone, Deserialize)]
 pub struct Request {
     pub name: String,
     pub protocol: Protocol,

@@ -3,6 +3,7 @@ use indexmap::IndexSet;
 use ratatui::{style::Color, widgets::ListState};
 use ratatui_textarea::TextArea;
 use reqwest::Client;
+use serde::Deserialize;
 use std::{error::Error, fs, path::PathBuf};
 use tokio::task::JoinHandle;
 use tui_input::Input;
@@ -66,7 +67,7 @@ pub struct CollectionStore {
     collections: Vec<Collection>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Deserialize, Debug, Default)]
 pub struct Collection {
     pub name: String,
     pub requests: Vec<Request>,
@@ -76,6 +77,20 @@ impl CollectionStore {
     fn get_config_path() -> Option<PathBuf> {
         let proj = ProjectDirs::from("com", "you", "reqtui")?;
         Some(proj.config_dir().join("collections"))
+    }
+
+    fn load_collection_to_history() -> Result<IndexSet<Request>, Box<dyn Error>> {
+        let Some(file_path) = Self::get_config_path() else {
+            return Ok(IndexSet::new());
+        };
+        let file = fs::read_to_string(file_path.join("default.json"))?;
+        let json: Collection = serde_json::from_str(&file)?;
+        let history = json.requests.into_iter().collect();
+        Ok(history)
+    }
+
+    fn write_to_collection() {
+        todo!()
     }
 
     fn list_collections() -> Self {
@@ -125,10 +140,6 @@ impl CollectionStore {
 
         Self { collections }
     }
-
-    fn write_to_collection() {
-        todo!()
-    }
 }
 
 #[derive(Debug, Default)]
@@ -159,6 +170,7 @@ impl App {
     pub fn new() -> Self {
         App {
             body: TextArea::from(vec!["{}".to_string()]),
+            history: CollectionStore::load_collection_to_history().unwrap_or(IndexSet::new()),
             collections: CollectionStore::list_collections(),
             ..Default::default()
         }
@@ -166,6 +178,7 @@ impl App {
     pub fn quit(&mut self) {
         self.should_quit = true;
     }
+
     // INFO: possible duplication with Request struct and url, right now overkill
     // TODO: add logging
     pub fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
