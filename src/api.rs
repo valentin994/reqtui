@@ -45,8 +45,9 @@ impl fmt::Display for Protocol {
     }
 }
 
-#[derive(Eq, Debug, PartialEq, Clone)]
+#[derive(Hash, Eq, Debug, PartialEq, Clone)]
 pub struct Request {
+    pub name: String,
     pub protocol: Protocol,
     pub request_type: RequestType,
     pub url: String,
@@ -55,11 +56,7 @@ pub struct Request {
 
 impl fmt::Display for Request {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{:?}| {}://{}",
-            self.request_type, self.protocol, self.url
-        )
+        write!(f, "{:?}| {}", self.request_type, self.name)
     }
 }
 

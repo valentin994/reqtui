@@ -1,7 +1,7 @@
 use ratatui::{
     Frame,
     layout::{Alignment, Constraint, Direction, Flex, Layout},
-    style::{Color, Modifier, Style, Stylize},
+    style::{Modifier, Style, Stylize},
     text::{Line, Span, Text},
     widgets::{Block, Borders, Clear, List, Padding, Paragraph},
 };
@@ -12,27 +12,41 @@ use crate::theme::THEME;
 
 // TODO: UI revamp
 // TODO: moduliraze the UI
-// TODO: new layout
-// TODO: color of request type
 
 pub fn render(app: &mut App, frame: &mut Frame) {
-    // Main chunks of the area that are going to be displayed
-    let chunks = Layout::default()
+    let [request_layout, hero_layout, footer_layout] = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(3),
             Constraint::Min(1),
             Constraint::Length(1),
         ])
-        .split(frame.area());
+        .areas(frame.area());
 
-    let request_layout = Layout::horizontal([Constraint::Length(12), Constraint::Percentage(100)])
-        .flex(Flex::Start)
-        .split(chunks[0]);
+    let [protocol, request] =
+        Layout::horizontal([Constraint::Length(12), Constraint::Percentage(100)])
+            .flex(Flex::Start)
+            .areas(request_layout);
 
-    let response_layout = Layout::horizontal([Constraint::Percentage(100), Constraint::Length(30)])
-        .flex(Flex::Start)
-        .split(chunks[1]);
+    let [collection, response, body] = Layout::horizontal([
+        Constraint::Length(20),
+        Constraint::Percentage(100),
+        Constraint::Length(30),
+    ])
+    .flex(Flex::Start)
+    .areas(hero_layout);
+
+    let collection_lines: Vec<String> = app.history.iter().map(|req| format!("{}", req)).collect();
+    let history_list = List::new(collection_lines)
+        .block(
+            Block::default()
+                .border_style(THEME.text)
+                .borders(Borders::ALL),
+        )
+        .style(THEME.text)
+        .highlight_style(Modifier::REVERSED)
+        .highlight_symbol("> ");
+    frame.render_stateful_widget(history_list, collection, &mut app.history_state);
 
     let request_type_block = Block::default()
         .border_style(THEME.text)
@@ -68,7 +82,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .map(|line| Line::from(line.to_owned()))
         .collect();
 
-    let response = Paragraph::new(lines)
+    let response_paragraph = Paragraph::new(lines)
         .style(Style::default().fg(THEME.text))
         .block(
             Block::default()
@@ -77,10 +91,10 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         )
         .scroll((app.scroll_response, 0));
 
-    let footer_layout = Layout::default()
+    let [mode, help] = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Length(12), Constraint::Percentage(100)])
-        .split(chunks[2]);
+        .areas(footer_layout);
 
     let current_screen_name = app.current_screen.name();
     let current_screen_color = app.current_screen.color();
@@ -88,7 +102,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     let [centered] = Layout::horizontal([Constraint::Length(12)])
         .flex(Flex::Center)
-        .areas(footer_layout[0]);
+        .areas(mode);
 
     let nav = Paragraph::new(Span::styled(
         current_screen_name,
@@ -97,7 +111,6 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     .alignment(Alignment::Center)
     .bg(current_screen_color);
 
-    // TODO: do the shadowing to other variables as well, like current_screen_help
     let current_screen_help = Paragraph::new(Line::from(current_screen_help)).block(
         Block::default()
             .bg(THEME.secondary)
@@ -114,12 +127,12 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             .style(THEME.derive_body(app.request_type)),
     );
 
-    frame.render_widget(request_type_paragraph, request_layout[0]);
-    frame.render_widget(url_paragraph, request_layout[1]);
-    frame.render_widget(response, response_layout[0]);
-    frame.render_widget(parsed_json_paragraph, response_layout[1]);
+    frame.render_widget(request_type_paragraph, protocol);
+    frame.render_widget(url_paragraph, request);
+    frame.render_widget(response_paragraph, response);
+    frame.render_widget(parsed_json_paragraph, body);
     frame.render_widget(nav, centered);
-    frame.render_widget(current_screen_help, footer_layout[1]);
+    frame.render_widget(current_screen_help, help);
 
     if app.current_screen == CurrentScreen::Editing {
         let url_focus = app.active_edit_field == ActiveEditField::Url;
@@ -128,9 +141,9 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             .area()
             .centered(Constraint::Percentage(60), Constraint::Percentage(80));
 
-        let editing_layout = Layout::vertical([Constraint::Length(3), Constraint::Min(3)])
+        let [edit_url, edit_body] = Layout::vertical([Constraint::Length(3), Constraint::Min(3)])
             .flex(Flex::Start)
-            .split(centered_area);
+            .areas(centered_area);
 
         let url_block = Block::bordered()
             .title("Enter URL")
@@ -169,14 +182,14 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                 THEME.background
             })
             .block(url_block);
-        frame.render_widget(paragraph, editing_layout[0]);
+        frame.render_widget(paragraph, edit_url);
 
         if url_focus {
             let x = app.url.visual_cursor().max(scroll) - scroll + 1;
-            frame.set_cursor_position((editing_layout[0].x + x as u16, editing_layout[0].y + 1));
+            frame.set_cursor_position((edit_url.x + x as u16, edit_url.y + 1));
         }
 
-        frame.render_widget(&app.body, editing_layout[1]);
+        frame.render_widget(&app.body, edit_body);
     }
     // TODO: make a new input field in history for search
     // TODO: if the url is not correct make the border red
@@ -206,8 +219,12 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     if app.loading {
         let loading_widget = throbber_widgets_tui::Throbber::default()
             .label("Sending request to")
-            .style(Style::default().fg(Color::Cyan))
-            .throbber_style(Style::default().fg(Color::Red).add_modifier(Modifier::BOLD))
+            .style(Style::default().fg(THEME.text))
+            .throbber_style(
+                Style::default()
+                    .fg(THEME.primary)
+                    .add_modifier(Modifier::BOLD),
+            )
             .throbber_set(throbber_widgets_tui::BRAILLE_SIX);
 
         let area = frame

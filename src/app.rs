@@ -1,7 +1,9 @@
+use directories::ProjectDirs;
+use indexmap::IndexSet;
 use ratatui::{style::Color, widgets::ListState};
 use ratatui_textarea::TextArea;
 use reqwest::Client;
-use std::error::Error;
+use std::{error::Error, fs, path::PathBuf};
 use tokio::task::JoinHandle;
 use tui_input::Input;
 
@@ -54,6 +56,81 @@ pub enum ActiveEditField {
     Body,
 }
 
+// TODO: save the requests into a file
+// TODO: update the history so it doesn't get duplicated entries
+// TODO: file search for postman collections
+// TODO: change up the hotkeys and way of selecting request type
+
+#[derive(Debug, Default)]
+pub struct CollectionStore {
+    collections: Vec<Collection>,
+}
+
+#[derive(Debug, Default)]
+pub struct Collection {
+    pub name: String,
+    pub requests: Vec<Request>,
+}
+
+impl CollectionStore {
+    fn get_config_path() -> Option<PathBuf> {
+        let proj = ProjectDirs::from("com", "you", "reqtui")?;
+        Some(proj.config_dir().join("collections"))
+    }
+
+    fn list_collections() -> Self {
+        let Some(config_path) = Self::get_config_path() else {
+            return Self {
+                collections: vec![],
+            };
+        };
+
+        if !config_path.exists() {
+            if let Err(_e) = fs::create_dir_all(&config_path) {
+                return Self {
+                    collections: vec![],
+                };
+            }
+        }
+
+        let default_file = config_path.join("default.json");
+        if !default_file.exists() {
+            let default_file_content = r#"{
+                "name": "Default",
+                "requests": []
+            }"#;
+
+            let _ = fs::write(&default_file, default_file_content);
+        }
+
+        let mut collections = Vec::new();
+
+        match fs::read_dir(&config_path) {
+            Ok(entries) => {
+                for entry in entries.into_iter().flatten() {
+                    let path = entry.path();
+
+                    if path.is_file() && path.extension().map_or(false, |ext| ext == "json") {
+                        if let Some(name) = path.file_stem().and_then(|n| n.to_str()) {
+                            collections.push(Collection {
+                                name: name.to_string(),
+                                requests: vec![],
+                            });
+                        }
+                    }
+                }
+            }
+            Err(_) => {}
+        }
+
+        Self { collections }
+    }
+
+    fn write_to_collection() {
+        todo!()
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct App {
     pub current_screen: CurrentScreen,
@@ -62,21 +139,27 @@ pub struct App {
     pub request_type: RequestType,
     pub protocol: Protocol,
     pub body: TextArea<'static>,
+    pub scroll_response: u16,
     pub active_edit_field: ActiveEditField,
-    pub should_quit: bool,
+
     pub client: Client,
-    pub history: Vec<Request>,
+    pub pending_tasks: Option<JoinHandle<Result<String, String>>>,
+
+    pub history: IndexSet<Request>,
     pub history_state: ListState,
     pub throbber_state: throbber_widgets_tui::ThrobberState,
     pub loading: bool,
-    pub pending_tasks: Option<JoinHandle<Result<String, String>>>,
-    pub scroll_response: u16,
+
+    pub collections: CollectionStore,
+
+    pub should_quit: bool,
 }
 
 impl App {
     pub fn new() -> Self {
         App {
             body: TextArea::from(vec!["{}".to_string()]),
+            collections: CollectionStore::list_collections(),
             ..Default::default()
         }
     }
@@ -85,17 +168,17 @@ impl App {
     }
     // INFO: possible duplication with Request struct and url, right now overkill
     // TODO: add logging
-    // TODO: postman collection import
     pub fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
         self.loading = true;
         let request = Request {
+            name: "Untitled".to_string(),
             protocol: self.protocol,
             request_type: self.request_type,
             url: self.url.to_string(),
             body: self.body.lines().join("\n"),
         };
         let client = self.client.clone();
-        self.history.insert(0, request.clone());
+        self.history.insert(request.clone());
         self.pending_tasks = Some(tokio::spawn(async move {
             request.send(&client).await.map_err(|e| e.to_string())
         }));
@@ -134,7 +217,7 @@ impl App {
     pub fn selected_request(&mut self) -> Option<&Request> {
         self.history_state
             .selected()
-            .and_then(|i| self.history.get(i))
+            .and_then(|i| self.history.get_index(i))
     }
 
     pub fn toggle_active_field(&mut self) {
