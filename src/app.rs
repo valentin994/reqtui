@@ -3,7 +3,7 @@ use indexmap::IndexSet;
 use ratatui::{style::Color, widgets::ListState};
 use ratatui_textarea::TextArea;
 use reqwest::Client;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{error::Error, fs, path::PathBuf};
 use tokio::task::JoinHandle;
 use tui_input::Input;
@@ -60,14 +60,14 @@ pub enum ActiveEditField {
 // TODO: file search for postman collections
 // TODO: change up the hotkeys and way of selecting request type
 
-// TODO write to json
-// TODO make it possible to select collections
+// TODO: write to json
+// TODO: make it possible to select collections
 #[derive(Debug, Default)]
 pub struct CollectionStore {
     collections: Vec<Collection>,
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Collection {
     pub name: String,
     pub requests: Vec<Request>,
@@ -83,14 +83,24 @@ impl CollectionStore {
         let Some(file_path) = Self::get_config_path() else {
             return Ok(IndexSet::new());
         };
+        // INFO: hardcoded default for now, after adding support to multiple collections rework
         let file = fs::read_to_string(file_path.join("default.json"))?;
-        let json: Collection = serde_json::from_str(&file)?;
-        let history = json.requests.into_iter().collect();
+        let collection: Collection = serde_json::from_str(&file)?;
+        let history = collection.requests.into_iter().collect();
         Ok(history)
     }
 
-    fn write_to_collection() {
-        todo!()
+    fn write_to_collection(history: IndexSet<Request>) -> Result<(), Box<dyn Error>> {
+        let Some(file_path) = Self::get_config_path() else {
+            return Err("could not find collection".into());
+        };
+        // INFO: hardcoded default for now, after adding support to multiple collections rework
+        let full_path = file_path.join("default.json");
+        let file = fs::read_to_string(&full_path)?;
+        let mut collection: Collection = serde_json::from_str(&file)?;
+        collection.requests = history.iter().cloned().collect();
+        fs::write(full_path, serde_json::to_string_pretty(&collection)?)?;
+        Ok(())
     }
 
     fn list_collections() -> Self {
@@ -192,6 +202,7 @@ impl App {
         };
         let client = self.client.clone();
         self.history.insert(request.clone());
+        CollectionStore::write_to_collection(self.history.clone());
         self.pending_tasks = Some(tokio::spawn(async move {
             request.send(&client).await.map_err(|e| e.to_string())
         }));
