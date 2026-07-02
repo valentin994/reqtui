@@ -1,5 +1,4 @@
 // TODO: file search for postman collections
-// TODO: change up the hotkeys and way of selecting request type
 
 use std::{error::Error, fs, path::PathBuf};
 
@@ -22,12 +21,12 @@ pub struct Collection {
 }
 
 impl CollectionStore {
-    fn get_config_path() -> Option<PathBuf> {
+    pub fn get_config_path() -> Option<PathBuf> {
         let proj = ProjectDirs::from("com", "you", "reqtui")?;
         Some(proj.config_dir().join("collections"))
     }
 
-    fn load_collection_to_history() -> Result<IndexSet<Request>, Box<dyn Error>> {
+    pub fn load_collection_to_history() -> Result<IndexSet<Request>, Box<dyn Error>> {
         let Some(file_path) = Self::get_config_path() else {
             return Ok(IndexSet::new());
         };
@@ -38,7 +37,7 @@ impl CollectionStore {
         Ok(history)
     }
 
-    fn write_to_collection(history: IndexSet<Request>) -> Result<(), Box<dyn Error>> {
+    pub fn write_to_collection(history: IndexSet<Request>) -> Result<(), Box<dyn Error>> {
         let Some(file_path) = Self::get_config_path() else {
             return Err("could not find collection".into());
         };
@@ -51,19 +50,19 @@ impl CollectionStore {
         Ok(())
     }
 
-    fn list_collections() -> Self {
+    pub fn list_collections() -> Self {
         let Some(config_path) = Self::get_config_path() else {
             return Self {
                 collections: vec![],
             };
         };
 
-        if !config_path.exists() {
-            if let Err(_e) = fs::create_dir_all(&config_path) {
-                return Self {
-                    collections: vec![],
-                };
-            }
+        if !config_path.exists()
+            && let Err(_e) = fs::create_dir_all(&config_path)
+        {
+            return Self {
+                collections: vec![],
+            };
         }
 
         let default_file = config_path.join("default.json");
@@ -78,22 +77,20 @@ impl CollectionStore {
 
         let mut collections = Vec::new();
 
-        match fs::read_dir(&config_path) {
-            Ok(entries) => {
-                for entry in entries.into_iter().flatten() {
-                    let path = entry.path();
+        if let Ok(entries) = fs::read_dir(&config_path) {
+            for entry in entries.into_iter().flatten() {
+                let path = entry.path();
 
-                    if path.is_file() && path.extension().map_or(false, |ext| ext == "json") {
-                        if let Some(name) = path.file_stem().and_then(|n| n.to_str()) {
-                            collections.push(Collection {
-                                name: name.to_string(),
-                                requests: vec![],
-                            });
-                        }
-                    }
+                if path.is_file()
+                    && path.extension().is_some_and(|ext| ext == "json")
+                    && let Some(name) = path.file_stem().and_then(|n| n.to_str())
+                {
+                    collections.push(Collection {
+                        name: name.to_string(),
+                        requests: vec![],
+                    });
                 }
             }
-            Err(_) => {}
         }
 
         Self { collections }

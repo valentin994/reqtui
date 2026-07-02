@@ -57,6 +57,8 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
         },
         CurrentScreen::Collection => match key_event.code {
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,
+            KeyCode::Up | KeyCode::Char('k') => todo!(),
+            KeyCode::Down | KeyCode::Char('j') => todo!(),
             _ => {}
         },
     }
