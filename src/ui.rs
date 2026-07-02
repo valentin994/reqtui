@@ -40,6 +40,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let history_list = List::new(collection_lines)
         .block(
             Block::default()
+                .title("Default")
                 .border_style(THEME.text)
                 .borders(Borders::ALL),
         )

@@ -7,6 +7,7 @@ use crate::api::RequestType;
 pub struct Theme {
     pub primary: Color,
     pub secondary: Color,
+    pub accent: Color,
     pub text: Color,
     pub background: Color,
     pub error: Color,
@@ -42,6 +43,7 @@ impl Theme {
 pub const THEME: Theme = Theme {
     primary: INDIGO.c600,
     secondary: EMERALD.c600,
+    accent: BLUE.c600,
     text: GRAY.c200,
     background: GRAY.c500,
     error: RED.c600,

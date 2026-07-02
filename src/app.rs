@@ -19,6 +19,7 @@ pub enum CurrentScreen {
     Main,
     Editing,
     History,
+    Collection,
 }
 
 impl CurrentScreen {
@@ -27,6 +28,7 @@ impl CurrentScreen {
             CurrentScreen::Main => "Main",
             CurrentScreen::Editing => "Editing",
             CurrentScreen::History => "History",
+            CurrentScreen::Collection => "Collection",
         }
     }
 
@@ -35,6 +37,7 @@ impl CurrentScreen {
             CurrentScreen::Main => THEME.primary,
             CurrentScreen::Editing => THEME.error,
             CurrentScreen::History => THEME.success,
+            CurrentScreen::Collection => THEME.accent,
         }
     }
 
@@ -46,6 +49,7 @@ impl CurrentScreen {
             }
             CurrentScreen::Editing => "(esc) / (alt + s) save value",
             CurrentScreen::History => "(esc) cancel, (q) quit",
+            CurrentScreen::Collection => "(esc) cancel",
         }
     }
 }
@@ -60,7 +64,6 @@ pub enum ActiveEditField {
 // TODO: file search for postman collections
 // TODO: change up the hotkeys and way of selecting request type
 
-// TODO: write to json
 // TODO: make it possible to select collections
 #[derive(Debug, Default)]
 pub struct CollectionStore {
