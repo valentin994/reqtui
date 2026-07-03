@@ -7,7 +7,7 @@ use ratatui::{
 };
 use ratatui_textarea::WrapMode;
 
-use crate::app::{ActiveEditField, App, CurrentScreen};
+use crate::app::{ActiveCollectionField, ActiveEditField, App, CurrentScreen};
 use crate::theme::THEME;
 
 // TODO: UI revamp
@@ -199,8 +199,10 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             .centered(Constraint::Percentage(60), Constraint::Percentage(60));
         frame.render_widget(Clear, centered_area);
 
-        let [add_collection, edit_body] =
-            Layout::vertical([Constraint::Length(3), Constraint::Min(3)])
+        let collection_focus = app.active_collection_field == ActiveCollectionField::CollectionList;
+
+        let [collection_list_layout, add_to_collection_layout] =
+            Layout::vertical([Constraint::Min(3), Constraint::Length(3)])
                 .flex(Flex::Start)
                 .areas(centered_area);
 
@@ -221,10 +223,50 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                     .border_style(THEME.text)
                     .borders(Borders::ALL),
             )
-            .style(THEME.text)
+            .style(if collection_focus {
+                THEME.text
+            } else {
+                THEME.background
+            })
             .highlight_style(Modifier::REVERSED)
             .highlight_symbol("> ");
-        frame.render_stateful_widget(collection_list, a, &mut app.collection_state);
+
+        let width = centered_area.width.max(3) - 3;
+        let scroll = app.collection_name.visual_scroll(width as usize);
+
+        let collection_block = Block::default()
+            .borders(Borders::ALL)
+            .padding(Padding::left(1))
+            .border_style(THEME.text)
+            .style(if collection_focus {
+                THEME.primary
+            } else {
+                THEME.text
+            });
+
+        let paragraph = Paragraph::new(app.collection_name.value())
+            .scroll((0, scroll as u16))
+            .style(if collection_focus {
+                THEME.background
+            } else {
+                THEME.text
+            })
+            .block(collection_block);
+
+        if !collection_focus {
+            let x = app.collection_name.visual_cursor().max(scroll) - scroll + 2;
+            frame.set_cursor_position((
+                add_to_collection_layout.x + x as u16,
+                add_to_collection_layout.y + 1,
+            ));
+        }
+        frame.render_stateful_widget(
+            collection_list,
+            collection_list_layout,
+            &mut app.collection_state,
+        );
+
+        frame.render_widget(paragraph, add_to_collection_layout);
     }
 
     // TODO: make a new input field in history for search

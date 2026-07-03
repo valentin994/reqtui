@@ -2,7 +2,7 @@ use ratatui::crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use tui_input::backend::crossterm::EventHandler;
 
 use crate::api::Protocol;
-use crate::app::{ActiveEditField, App, CurrentScreen};
+use crate::app::{ActiveCollectionField, ActiveEditField, App, CurrentScreen};
 use crate::config::CollectionStore;
 
 pub async fn update(app: &mut App, key_event: KeyEvent) {
@@ -57,14 +57,31 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             _ => {}
         },
         CurrentScreen::Collection => match key_event.code {
+            KeyCode::Tab => app.toggle_active_field(),
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,
-            KeyCode::Char('a') | KeyCode::Char('n') => {
-                CollectionStore::add_collection(app.collection_name.to_string())
-                    .expect("Failed to create collection");
+            KeyCode::Up | KeyCode::Char('k')
+                if app.active_collection_field == ActiveCollectionField::CollectionList =>
+            {
+                app.collection_state.select_previous()
             }
-            KeyCode::Up | KeyCode::Char('k') => app.collection_state.select_previous(),
-            KeyCode::Down | KeyCode::Char('j') => app.collection_state.select_next(),
-            _ => {}
+            KeyCode::Down | KeyCode::Char('j')
+                if app.active_collection_field == ActiveCollectionField::CollectionList =>
+            {
+                app.collection_state.select_next()
+            }
+            KeyCode::Enter => match app.active_collection_field {
+                ActiveCollectionField::CollectionList => todo!(),
+                ActiveCollectionField::AddCollection => {
+                    CollectionStore::add_collection(app.collection_name.to_string())
+                        .expect("Failed to add collection")
+                }
+            },
+            _ => match app.active_collection_field {
+                ActiveCollectionField::AddCollection => {
+                    app.collection_name.handle_event(&Event::Key(key_event));
+                }
+                ActiveCollectionField::CollectionList => {}
+            },
         },
     }
 }

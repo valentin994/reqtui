@@ -61,6 +61,13 @@ pub enum ActiveEditField {
     Body,
 }
 
+#[derive(Debug, Default, PartialEq)]
+pub enum ActiveCollectionField {
+    #[default]
+    CollectionList,
+    AddCollection,
+}
+
 #[derive(Debug, Default)]
 pub struct App {
     pub current_screen: CurrentScreen,
@@ -83,6 +90,7 @@ pub struct App {
     pub collection_store: CollectionStore,
     pub collection_state: ListState,
     pub collection_name: Input,
+    pub active_collection_field: ActiveCollectionField,
 
     pub should_quit: bool,
 }
@@ -159,6 +167,15 @@ impl App {
         match self.active_edit_field {
             ActiveEditField::Url => self.active_edit_field = ActiveEditField::Body,
             ActiveEditField::Body => self.active_edit_field = ActiveEditField::Url,
+        }
+
+        match self.active_collection_field {
+            ActiveCollectionField::AddCollection => {
+                self.active_collection_field = ActiveCollectionField::CollectionList
+            }
+            ActiveCollectionField::CollectionList => {
+                self.active_collection_field = ActiveCollectionField::AddCollection
+            }
         }
     }
     // TODO: load testing feature
