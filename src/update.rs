@@ -3,6 +3,7 @@ use tui_input::backend::crossterm::EventHandler;
 
 use crate::api::Protocol;
 use crate::app::{ActiveEditField, App, CurrentScreen};
+use crate::config::CollectionStore;
 
 pub async fn update(app: &mut App, key_event: KeyEvent) {
     match app.current_screen {
@@ -57,8 +58,12 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
         },
         CurrentScreen::Collection => match key_event.code {
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,
-            KeyCode::Up | KeyCode::Char('k') => todo!(),
-            KeyCode::Down | KeyCode::Char('j') => todo!(),
+            KeyCode::Char('a') | KeyCode::Char('n') => {
+                CollectionStore::add_collection(app.collection_name.to_string())
+                    .expect("Failed to create collection");
+            }
+            KeyCode::Up | KeyCode::Char('k') => app.collection_state.select_previous(),
+            KeyCode::Down | KeyCode::Char('j') => app.collection_state.select_next(),
             _ => {}
         },
     }

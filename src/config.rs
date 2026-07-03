@@ -1,6 +1,6 @@
 // TODO: file search for postman collections
 
-use std::{error::Error, fs, path::PathBuf};
+use std::{error::Error, fmt, fs, path::PathBuf};
 
 use directories::ProjectDirs;
 use indexmap::IndexSet;
@@ -9,15 +9,21 @@ use serde::{Deserialize, Serialize};
 use crate::api::Request;
 
 // TODO: make it possible to select collections
-#[derive(Debug, Default)]
+#[derive(Default, Debug)]
 pub struct CollectionStore {
-    collections: Vec<Collection>,
+    pub collections: Vec<Collection>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Collection {
     pub name: String,
     pub requests: Vec<Request>,
+}
+
+impl fmt::Display for Collection {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.name)
+    }
 }
 
 impl CollectionStore {
@@ -50,6 +56,24 @@ impl CollectionStore {
         Ok(())
     }
 
+    pub fn add_collection(name: String) -> Result<(), Box<dyn Error>> {
+        let Some(file_path) = Self::get_config_path() else {
+            return Err("Could not access the base path".into());
+        };
+        let full_path = file_path.join(&name);
+        let new_collection: Collection = Collection {
+            name: name.to_string(),
+            requests: vec![],
+        };
+        let collection_content = serde_json::to_string_pretty(&new_collection)?;
+        fs::write(full_path, collection_content)?;
+        Ok(())
+    }
+
+    pub fn delete_collection() {
+        todo!()
+    }
+
     pub fn list_collections() -> Self {
         let Some(config_path) = Self::get_config_path() else {
             return Self {
@@ -64,7 +88,7 @@ impl CollectionStore {
                 collections: vec![],
             };
         }
-
+        // TODO: maybe move this to startup
         let default_file = config_path.join("default.json");
         if !default_file.exists() {
             let default_file_content = r#"{

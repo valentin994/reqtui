@@ -80,7 +80,9 @@ pub struct App {
     pub throbber_state: throbber_widgets_tui::ThrobberState,
     pub loading: bool,
 
-    pub collections: CollectionStore,
+    pub collection_store: CollectionStore,
+    pub collection_state: ListState,
+    pub collection_name: Input,
 
     pub should_quit: bool,
 }
@@ -90,7 +92,7 @@ impl App {
         App {
             body: TextArea::from(vec!["{}".to_string()]),
             history: CollectionStore::load_collection_to_history().unwrap_or_default(),
-            collections: CollectionStore::list_collections(),
+            collection_store: CollectionStore::list_collections(),
             ..Default::default()
         }
     }

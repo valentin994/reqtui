@@ -32,6 +32,7 @@ No config files, no environment variables, no arguments needed.
 |---|---|
 | `e` | Open request editor |
 | `h` | Open history |
+| `c` | Open collections |
 | `Enter` | Send request |
 | `Tab` | Cycle HTTP method |
 | `p` | Toggle HTTP / HTTPS |
@@ -51,4 +52,14 @@ No config files, no environment variables, no arguments needed.
 | `↑` / `k` | Previous entry |
 | `↓` / `j` | Next entry |
 | `Enter` | Load selected request |
+| `Esc` | Return to main screen |
+
+### Collection Overlay
+| Key | Action |
+|---|---|
+| `↑` / `k` | Previous entry |
+| `↓` / `j` | Next entry |
+| `a / `n` | Add new collection |
+| `d` | Delete collection |
+| `Enter` | Load selected collection |
 | `Esc` | Return to main screen |

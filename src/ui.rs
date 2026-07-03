@@ -192,6 +192,41 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
         frame.render_widget(&app.body, edit_body);
     }
+
+    if app.current_screen == CurrentScreen::Collection {
+        let centered_area = frame
+            .area()
+            .centered(Constraint::Percentage(60), Constraint::Percentage(60));
+        frame.render_widget(Clear, centered_area);
+
+        let [add_collection, edit_body] =
+            Layout::vertical([Constraint::Length(3), Constraint::Min(3)])
+                .flex(Flex::Start)
+                .areas(centered_area);
+
+        let collection_lines: Vec<String> = app
+            .collection_store
+            .collections
+            .iter()
+            .map(|collection| format!("{}", collection))
+            .collect();
+
+        if !app.collection_store.collections.is_empty() && app.collection_state.selected().is_none()
+        {
+            app.collection_state.select(Some(0));
+        }
+        let collection_list = List::new(collection_lines)
+            .block(
+                Block::default()
+                    .border_style(THEME.text)
+                    .borders(Borders::ALL),
+            )
+            .style(THEME.text)
+            .highlight_style(Modifier::REVERSED)
+            .highlight_symbol("> ");
+        frame.render_stateful_widget(collection_list, a, &mut app.collection_state);
+    }
+
     // TODO: make a new input field in history for search
     // TODO: if the url is not correct make the border red
     if app.current_screen == CurrentScreen::History {
