@@ -54,11 +54,27 @@ impl CurrentScreen {
     }
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Clone, Copy)]
 pub enum ActiveEditField {
     #[default]
+    Name,
     Url,
     Body,
+}
+
+impl ActiveEditField {
+    const VARIANTS: [ActiveEditField; 3] = [
+        ActiveEditField::Name,
+        ActiveEditField::Url,
+        ActiveEditField::Body,
+    ];
+    pub fn next(self) -> ActiveEditField {
+        let idx = ActiveEditField::VARIANTS
+            .iter()
+            .position(|&r| r == self)
+            .unwrap();
+        ActiveEditField::VARIANTS[(idx + 1) % ActiveEditField::VARIANTS.len()]
+    }
 }
 
 #[derive(Debug, Default, PartialEq)]
@@ -71,6 +87,7 @@ pub enum ActiveCollectionField {
 #[derive(Debug, Default)]
 pub struct App {
     pub current_screen: CurrentScreen,
+    pub request_name: Input,
     pub url: Input,
     pub response: String,
     pub request_type: RequestType,
@@ -99,7 +116,8 @@ impl App {
     pub fn new() -> Self {
         App {
             body: TextArea::from(vec!["{}".to_string()]),
-            history: CollectionStore::load_collection_to_history().unwrap_or_default(),
+            history: CollectionStore::load_collection_to_history("default.json".to_string())
+                .unwrap_or_default(),
             collection_store: CollectionStore::list_collections(),
             ..Default::default()
         }
@@ -113,7 +131,7 @@ impl App {
     pub fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
         self.loading = true;
         let request = Request {
-            name: "Untitled".to_string(),
+            name: self.request_name.value().to_string(),
             protocol: self.protocol,
             request_type: self.request_type,
             url: self.url.to_string(),
@@ -163,20 +181,5 @@ impl App {
             .and_then(|i| self.history.get_index(i))
     }
 
-    pub fn toggle_active_field(&mut self) {
-        match self.active_edit_field {
-            ActiveEditField::Url => self.active_edit_field = ActiveEditField::Body,
-            ActiveEditField::Body => self.active_edit_field = ActiveEditField::Url,
-        }
-
-        match self.active_collection_field {
-            ActiveCollectionField::AddCollection => {
-                self.active_collection_field = ActiveCollectionField::CollectionList
-            }
-            ActiveCollectionField::CollectionList => {
-                self.active_collection_field = ActiveCollectionField::AddCollection
-            }
-        }
-    }
     // TODO: load testing feature
 }

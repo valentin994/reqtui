@@ -31,12 +31,15 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
         },
         CurrentScreen::Editing => match key_event.code {
             // TODO: on escape don't save URL
-            KeyCode::Tab => app.toggle_active_field(),
+            KeyCode::Tab => app.active_edit_field = app.active_edit_field.next(),
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,
             KeyCode::Char('s') if key_event.modifiers.contains(KeyModifiers::ALT) => {
                 app.current_screen = CurrentScreen::Main
             }
             _ => match app.active_edit_field {
+                ActiveEditField::Name => {
+                    app.request_name.handle_event(&Event::Key(key_event));
+                }
                 ActiveEditField::Url => {
                     app.url.handle_event(&Event::Key(key_event));
                 }
@@ -57,7 +60,12 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             _ => {}
         },
         CurrentScreen::Collection => match key_event.code {
-            KeyCode::Tab => app.toggle_active_field(),
+            KeyCode::Tab => {
+                app.active_collection_field = match app.active_collection_field {
+                    ActiveCollectionField::AddCollection => ActiveCollectionField::CollectionList,
+                    ActiveCollectionField::CollectionList => ActiveCollectionField::AddCollection,
+                }
+            }
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,
             KeyCode::Up | KeyCode::Char('k')
                 if app.active_collection_field == ActiveCollectionField::CollectionList =>

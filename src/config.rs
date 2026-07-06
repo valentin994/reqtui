@@ -32,12 +32,12 @@ impl CollectionStore {
         Some(proj.config_dir().join("collections"))
     }
 
-    pub fn load_collection_to_history() -> Result<IndexSet<Request>, Box<dyn Error>> {
+    pub fn load_collection_to_history(name: String) -> Result<IndexSet<Request>, Box<dyn Error>> {
         let Some(file_path) = Self::get_config_path() else {
             return Ok(IndexSet::new());
         };
         // INFO: hardcoded default for now, after adding support to multiple collections rework
-        let file = fs::read_to_string(file_path.join("default.json"))?;
+        let file = fs::read_to_string(file_path.join(name))?;
         let collection: Collection = serde_json::from_str(&file)?;
         let history = collection.requests.into_iter().collect();
         Ok(history)
