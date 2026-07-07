@@ -14,7 +14,7 @@ pub struct CollectionStore {
     pub collections: Vec<Collection>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Collection {
     pub name: String,
     pub requests: Vec<Request>,
@@ -60,7 +60,7 @@ impl CollectionStore {
         let Some(file_path) = Self::get_config_path() else {
             return Err("Could not access the base path".into());
         };
-        let full_path = file_path.join(&name);
+        let full_path = file_path.join(format!("{}.json", &name));
         let new_collection: Collection = Collection {
             name: name.to_string(),
             requests: vec![],
@@ -70,8 +70,13 @@ impl CollectionStore {
         Ok(())
     }
 
-    pub fn delete_collection() {
-        todo!()
+    pub fn delete_collection(name: String) -> Result<(), Box<dyn Error>> {
+        let Some(file_path) = Self::get_config_path() else {
+            return Err("Could not access the base path".into());
+        };
+        let full_path = file_path.join(format!("{}.json", &name));
+        let _ = fs::remove_file(full_path);
+        Ok(())
     }
 
     pub fn list_collections() -> Self {
@@ -88,7 +93,7 @@ impl CollectionStore {
                 collections: vec![],
             };
         }
-        // TODO: maybe move this to startup
+        // TODO: maybe move this to startup, use serde instead of raw json
         let default_file = config_path.join("default.json");
         if !default_file.exists() {
             let default_file_content = r#"{

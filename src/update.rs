@@ -3,7 +3,6 @@ use tui_input::backend::crossterm::EventHandler;
 
 use crate::api::Protocol;
 use crate::app::{ActiveCollectionField, ActiveEditField, App, CurrentScreen};
-use crate::config::CollectionStore;
 
 pub async fn update(app: &mut App, key_event: KeyEvent) {
     match app.current_screen {
@@ -55,7 +54,6 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             KeyCode::Down | KeyCode::Char('j') => app.history_state.select_next(),
             KeyCode::Enter => {
                 app.set_request();
-                app.current_screen = CurrentScreen::Main;
             }
             _ => {}
         },
@@ -72,16 +70,22 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             {
                 app.collection_state.select_previous()
             }
+            KeyCode::Char('d')
+                if app.active_collection_field == ActiveCollectionField::CollectionList =>
+            {
+                app.delete_collection();
+            }
             KeyCode::Down | KeyCode::Char('j')
                 if app.active_collection_field == ActiveCollectionField::CollectionList =>
             {
                 app.collection_state.select_next()
             }
             KeyCode::Enter => match app.active_collection_field {
-                ActiveCollectionField::CollectionList => todo!(),
+                ActiveCollectionField::CollectionList => {
+                    app.set_collection();
+                }
                 ActiveCollectionField::AddCollection => {
-                    CollectionStore::add_collection(app.collection_name.to_string())
-                        .expect("Failed to add collection")
+                    app.add_collection();
                 }
             },
             _ => match app.active_collection_field {

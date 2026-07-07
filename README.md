@@ -59,7 +59,7 @@ No config files, no environment variables, no arguments needed.
 |---|---|
 | `↑` / `k` | Previous entry |
 | `↓` / `j` | Next entry |
-| `a / `n` | Add new collection |
+| `a` / `n` | Add new collection |
 | `d` | Delete collection |
 | `Enter` | Load selected collection |
 | `Esc` | Return to main screen |

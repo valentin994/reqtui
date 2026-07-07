@@ -8,7 +8,7 @@ use tui_input::Input;
 
 use crate::{
     api::{Protocol, Request, RequestType},
-    config::CollectionStore,
+    config::{Collection, CollectionStore},
     theme::THEME,
 };
 
@@ -104,7 +104,7 @@ pub struct App {
     pub throbber_state: throbber_widgets_tui::ThrobberState,
     pub loading: bool,
 
-    pub collection_store: CollectionStore,
+    pub collection: CollectionStore,
     pub collection_state: ListState,
     pub collection_name: Input,
     pub active_collection_field: ActiveCollectionField,
@@ -118,7 +118,7 @@ impl App {
             body: TextArea::from(vec!["{}".to_string()]),
             history: CollectionStore::load_collection_to_history("default.json".to_string())
                 .unwrap_or_default(),
-            collection_store: CollectionStore::list_collections(),
+            collection: CollectionStore::list_collections(),
             ..Default::default()
         }
     }
@@ -173,12 +173,47 @@ impl App {
         self.protocol = req.protocol;
         self.request_type = req.request_type;
         self.body = TextArea::from(req.body.lines());
+        self.current_screen = CurrentScreen::Main;
     }
 
     pub fn selected_request(&mut self) -> Option<&Request> {
         self.history_state
             .selected()
             .and_then(|i| self.history.get_index(i))
+    }
+
+    pub fn set_collection(&mut self) {
+        let Some(collection) = self.selected_collection().cloned() else {
+            return;
+        };
+        self.history =
+            CollectionStore::load_collection_to_history(format!("{}.json", collection.name))
+                .unwrap_or_default();
+        self.collection = CollectionStore::list_collections();
+        self.current_screen = CurrentScreen::Main;
+    }
+
+    pub fn selected_collection(&mut self) -> Option<&Collection> {
+        self.collection_state
+            .selected()
+            .and_then(|i| self.collection.collections.get(i))
+    }
+
+    pub fn add_collection(&mut self) {
+        CollectionStore::add_collection(self.collection_name.to_string())
+            .expect("Failed to add collection");
+        self.collection_name.value_and_reset();
+        self.collection = CollectionStore::list_collections();
+        self.active_collection_field = ActiveCollectionField::CollectionList;
+        self.current_screen = CurrentScreen::Main;
+    }
+
+    pub fn delete_collection(&mut self) {
+        let Some(collection) = self.selected_collection().cloned() else {
+            return;
+        };
+        CollectionStore::delete_collection(collection.name).expect("Failed to delete collection");
+        self.collection = CollectionStore::list_collections();
     }
 
     // TODO: load testing feature

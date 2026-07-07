@@ -40,7 +40,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let history_list = List::new(collection_lines)
         .block(
             Block::default()
-                .title("Default")
+                .title("Default".to_string())
                 .border_style(THEME.text)
                 .borders(Borders::ALL),
         )
@@ -239,14 +239,13 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                 .areas(centered_area);
 
         let collection_lines: Vec<String> = app
-            .collection_store
+            .collection
             .collections
             .iter()
             .map(|collection| format!("{}", collection))
             .collect();
 
-        if !app.collection_store.collections.is_empty() && app.collection_state.selected().is_none()
-        {
+        if app.collection_state.selected().is_none() {
             app.collection_state.select(Some(0));
         }
         let collection_list = List::new(collection_lines)
