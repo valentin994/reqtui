@@ -75,6 +75,11 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             {
                 app.delete_collection();
             }
+            KeyCode::Char('q')
+                if app.active_collection_field == ActiveCollectionField::CollectionList =>
+            {
+                app.quit();
+            }
             KeyCode::Down | KeyCode::Char('j')
                 if app.active_collection_field == ActiveCollectionField::CollectionList =>
             {

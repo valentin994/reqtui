@@ -49,7 +49,9 @@ impl CurrentScreen {
             }
             CurrentScreen::Editing => "(esc) / (alt + s) save value",
             CurrentScreen::History => "(esc) cancel, (q) quit",
-            CurrentScreen::Collection => "(esc) cancel",
+            CurrentScreen::Collection => {
+                "(esc) cancel / (q) quit / (enter) add or select collection / (d) delete collection"
+            }
         }
     }
 }
@@ -205,7 +207,6 @@ impl App {
         self.collection_name.value_and_reset();
         self.collection = CollectionStore::list_collections();
         self.active_collection_field = ActiveCollectionField::CollectionList;
-        self.current_screen = CurrentScreen::Main;
     }
 
     pub fn delete_collection(&mut self) {

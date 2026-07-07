@@ -53,13 +53,15 @@ No config files, no environment variables, no arguments needed.
 | `↓` / `j` | Next entry |
 | `Enter` | Load selected request |
 | `Esc` | Return to main screen |
+| `q` / `Esc` | Quit |
 
 ### Collection Overlay
 | Key | Action |
 |---|---|
 | `↑` / `k` | Previous entry |
 | `↓` / `j` | Next entry |
-| `a` / `n` | Add new collection |
 | `d` | Delete collection |
 | `Enter` | Load selected collection |
+| `Enter` | Add new collection |
 | `Esc` | Return to main screen |
+| `q` / `Esc` | Quit |

@@ -267,6 +267,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
         let collection_block = Block::default()
             .borders(Borders::ALL)
+            .title("Enter new collection name")
             .padding(Padding::left(1))
             .border_style(THEME.text)
             .style(if collection_focus {
