@@ -1,5 +1,6 @@
 pub mod api;
 pub mod app;
+pub mod collections;
 pub mod config;
 pub mod event;
 pub mod theme;
@@ -19,7 +20,8 @@ use crate::app::App;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // setup terminal
-    let mut app = App::new();
+    let config = config::load_config()?;
+    let mut app = App::new(config);
 
     let backend = CrosstermBackend::new(io::stderr());
     let terminal = Terminal::new(backend)?;

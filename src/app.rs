@@ -8,7 +8,8 @@ use tui_input::Input;
 
 use crate::{
     api::{Protocol, Request, RequestType},
-    config::{Collection, CollectionStore},
+    collections::{Collection, CollectionStore},
+    config::AppConfig,
     theme::THEME,
 };
 
@@ -88,6 +89,8 @@ pub enum ActiveCollectionField {
 
 #[derive(Debug, Default)]
 pub struct App {
+    pub config: AppConfig,
+
     pub current_screen: CurrentScreen,
     pub request_name: Input,
     pub url: Input,
@@ -107,6 +110,7 @@ pub struct App {
     pub loading: bool,
 
     pub collection: CollectionStore,
+    pub active_collection_name: String,
     pub collection_state: ListState,
     pub collection_name: Input,
     pub active_collection_field: ActiveCollectionField,
@@ -115,12 +119,16 @@ pub struct App {
 }
 
 impl App {
-    pub fn new() -> Self {
+    pub fn new(config: AppConfig) -> Self {
         App {
             body: TextArea::from(vec!["{}".to_string()]),
-            history: CollectionStore::load_collection_to_history("default.json".to_string())
-                .unwrap_or_default(),
+            history: CollectionStore::load_collection_to_history(&format!(
+                "{}.json",
+                config.collection_name
+            ))
+            .unwrap_or_default(),
             collection: CollectionStore::list_collections(),
+            config,
             ..Default::default()
         }
     }
@@ -141,7 +149,10 @@ impl App {
         };
         let client = self.client.clone();
         self.history.insert(request.clone());
-        CollectionStore::write_to_collection(self.history.clone())?;
+        CollectionStore::write_to_collection(
+            self.history.clone(),
+            self.active_collection_name.clone(),
+        )?;
         self.pending_tasks = Some(tokio::spawn(async move {
             request.send(&client).await.map_err(|e| e.to_string())
         }));
@@ -189,8 +200,9 @@ impl App {
             return;
         };
         self.history =
-            CollectionStore::load_collection_to_history(format!("{}.json", collection.name))
+            CollectionStore::load_collection_to_history(&format!("{}.json", collection.name))
                 .unwrap_or_default();
+        self.collection_name = collection.name.into();
         self.collection = CollectionStore::list_collections();
         self.current_screen = CurrentScreen::Main;
     }
