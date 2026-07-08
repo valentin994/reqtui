@@ -11,6 +11,7 @@ Do I care, absolutely not.
 - Send HTTP requests: **GET, POST, PUT, PATCH, DELETE**
 - **Async non-blocking requests** with a 4-second timeout
 - **Session history** — browse and re-load previous requests
+- **Collections** - save your requests between sessions
 
 ## Build & Run
 
