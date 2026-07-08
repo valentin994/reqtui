@@ -44,18 +44,12 @@ impl CollectionStore {
 
     pub fn write_to_collection(
         history: IndexSet<Request>,
-        active_collection_name: String,
+        active_collection_name: &str,
     ) -> Result<(), Box<dyn Error>> {
         let Some(file_path) = Self::get_config_path() else {
             return Err("could not find collection".into());
         };
-        // INFO: hardcoded default for now, after adding support to multiple collections rework
-        let collection_name = if active_collection_name.is_empty() {
-            "default"
-        } else {
-            &active_collection_name
-        };
-        let full_path = file_path.join(format!("{}.json", collection_name));
+        let full_path = file_path.join(format!("{}.json", active_collection_name));
         let file = fs::read_to_string(&full_path)?;
         let mut collection: Collection = serde_json::from_str(&file)?;
         collection.requests = history.iter().cloned().collect();

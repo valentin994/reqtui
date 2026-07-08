@@ -61,9 +61,6 @@ impl fmt::Display for Request {
     }
 }
 
-// TODO: implement request response or error type
-// TODO: body, query params, and etc
-
 impl Request {
     pub async fn send(&self, client: &Client) -> Result<String, Box<dyn Error>> {
         let prepare_request = match self.request_type {
@@ -82,6 +79,7 @@ impl Request {
                 .header(CONTENT_TYPE, "application/json"),
             RequestType::DELETE => client.delete(format!("{}://{}", self.protocol, self.url)),
         };
+        // TODO: use config timeout
         match prepare_request.timeout(Duration::from_secs(4)).send().await {
             Ok(resp) => Ok(resp.text().await?),
             Err(e) if e.is_timeout() => Ok("timeout".to_string()),

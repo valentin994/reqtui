@@ -110,7 +110,6 @@ pub struct App {
     pub loading: bool,
 
     pub collection: CollectionStore,
-    pub active_collection_name: String,
     pub collection_state: ListState,
     pub collection_name: Input,
     pub active_collection_field: ActiveCollectionField,
@@ -149,10 +148,7 @@ impl App {
         };
         let client = self.client.clone();
         self.history.insert(request.clone());
-        CollectionStore::write_to_collection(
-            self.history.clone(),
-            self.active_collection_name.clone(),
-        )?;
+        CollectionStore::write_to_collection(self.history.clone(), &self.config.collection_name)?;
         self.pending_tasks = Some(tokio::spawn(async move {
             request.send(&client).await.map_err(|e| e.to_string())
         }));
@@ -199,10 +195,12 @@ impl App {
         let Some(collection) = self.selected_collection().cloned() else {
             return;
         };
-        self.history =
-            CollectionStore::load_collection_to_history(&format!("{}.json", collection.name))
-                .unwrap_or_default();
-        self.collection_name = collection.name.into();
+        self.config.collection_name = collection.name;
+        self.history = CollectionStore::load_collection_to_history(&format!(
+            "{}.json",
+            self.config.collection_name
+        ))
+        .unwrap_or_default();
         self.collection = CollectionStore::list_collections();
         self.current_screen = CurrentScreen::Main;
     }
