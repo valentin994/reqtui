@@ -189,6 +189,15 @@ impl App {
         self.current_screen = CurrentScreen::Main;
     }
 
+    pub fn delete_request(&mut self) -> Result<(), Box<dyn Error>> {
+        let Some(req) = self.selected_request().cloned() else {
+            return Err("cannot delete request".into());
+        };
+        self.history.swap_remove(&req);
+        CollectionStore::write_to_collection(self.history.clone(), &self.config.collection_name)?;
+        Ok(())
+    }
+
     pub fn selected_request(&mut self) -> Option<&Request> {
         self.history_state
             .selected()

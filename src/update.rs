@@ -50,6 +50,7 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
         CurrentScreen::History => match key_event.code {
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,
             KeyCode::Char('q') => app.quit(),
+            KeyCode::Char('d') => app.delete_request().expect("unable to delete request"),
             KeyCode::Up | KeyCode::Char('k') => app.history_state.select_previous(),
             KeyCode::Down | KeyCode::Char('j') => app.history_state.select_next(),
             KeyCode::Enter => {
