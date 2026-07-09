@@ -6,14 +6,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AppConfig {
     pub collection_name: String,
-    pub request_timeout: u16,
+    pub request_timeout: u8,
 }
 
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
             collection_name: "default".to_string(),
-            request_timeout: 2000,
+            request_timeout: 5,
         }
     }
 }

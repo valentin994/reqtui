@@ -62,7 +62,7 @@ impl fmt::Display for Request {
 }
 
 impl Request {
-    pub async fn send(&self, client: &Client) -> Result<String, Box<dyn Error>> {
+    pub async fn send(&self, client: &Client, timeout: u8) -> Result<String, Box<dyn Error>> {
         let prepare_request = match self.request_type {
             RequestType::GET => client.get(format!("{}://{}", self.protocol, self.url)),
             RequestType::POST => client
@@ -80,7 +80,11 @@ impl Request {
             RequestType::DELETE => client.delete(format!("{}://{}", self.protocol, self.url)),
         };
         // TODO: use config timeout
-        match prepare_request.timeout(Duration::from_secs(4)).send().await {
+        match prepare_request
+            .timeout(Duration::from_secs(timeout.into()))
+            .send()
+            .await
+        {
             Ok(resp) => Ok(resp.text().await?),
             Err(e) if e.is_timeout() => Ok("timeout".to_string()),
             Err(e) => Err(Box::new(e)),

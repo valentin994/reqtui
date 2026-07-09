@@ -147,10 +147,14 @@ impl App {
             body: self.body.lines().join("\n"),
         };
         let client = self.client.clone();
+        let timeout = self.config.request_timeout;
         self.history.insert(request.clone());
         CollectionStore::write_to_collection(self.history.clone(), &self.config.collection_name)?;
         self.pending_tasks = Some(tokio::spawn(async move {
-            request.send(&client).await.map_err(|e| e.to_string())
+            request
+                .send(&client, timeout)
+                .await
+                .map_err(|e| e.to_string())
         }));
         Ok(())
     }
