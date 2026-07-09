@@ -126,7 +126,7 @@ impl App {
                 config.collection_name
             ))
             .unwrap_or_default(),
-            collection: CollectionStore::list_collections(),
+            collection: CollectionStore::list_collections().expect("Couldn't load collection"),
             config,
             ..Default::default()
         }
@@ -214,7 +214,7 @@ impl App {
             self.config.collection_name
         ))
         .unwrap_or_default();
-        self.collection = CollectionStore::list_collections();
+        self.collection = CollectionStore::list_collections().expect("Couldnt load collection");
         self.current_screen = CurrentScreen::Main;
     }
 
@@ -228,7 +228,7 @@ impl App {
         CollectionStore::add_collection(self.collection_name.to_string())
             .expect("Failed to add collection");
         self.collection_name.value_and_reset();
-        self.collection = CollectionStore::list_collections();
+        self.collection = CollectionStore::list_collections().expect("Couldnt load collection");
         self.active_collection_field = ActiveCollectionField::CollectionList;
     }
 
@@ -237,7 +237,7 @@ impl App {
             return;
         };
         CollectionStore::delete_collection(collection.name).expect("Failed to delete collection");
-        self.collection = CollectionStore::list_collections();
+        self.collection = CollectionStore::list_collections().expect("Couldn't load collection");
     }
 
     // TODO: load testing feature

@@ -79,7 +79,6 @@ impl Request {
                 .header(CONTENT_TYPE, "application/json"),
             RequestType::DELETE => client.delete(format!("{}://{}", self.protocol, self.url)),
         };
-        // TODO: use config timeout
         match prepare_request
             .timeout(Duration::from_secs(timeout.into()))
             .send()

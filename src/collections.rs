@@ -80,29 +80,28 @@ impl CollectionStore {
         Ok(())
     }
 
-    pub fn list_collections() -> Self {
+    pub fn list_collections() -> Result<Self, Box<dyn Error>> {
         let Some(config_path) = Self::get_config_path() else {
-            return Self {
+            return Ok(Self {
                 collections: vec![],
-            };
+            });
         };
 
         if !config_path.exists()
             && let Err(_e) = fs::create_dir_all(&config_path)
         {
-            return Self {
+            return Ok(Self {
                 collections: vec![],
-            };
+            });
         }
-        // TODO: maybe move this to startup, use serde instead of raw json
         let default_file = config_path.join("default.json");
         if !default_file.exists() {
-            let default_file_content = r#"{
-                "name": "Default",
-                "requests": []
-            }"#;
-
-            let _ = fs::write(&default_file, default_file_content);
+            let default_collection: Collection = Collection {
+                name: "default".to_string(),
+                requests: vec![],
+            };
+            let collection_content = serde_json::to_string_pretty(&default_collection)?;
+            fs::write(&config_path, collection_content)?;
         }
 
         let mut collections = Vec::new();
@@ -123,6 +122,6 @@ impl CollectionStore {
             }
         }
 
-        Self { collections }
+        Ok(Self { collections })
     }
 }
