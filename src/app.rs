@@ -42,14 +42,13 @@ impl CurrentScreen {
         }
     }
 
-    // TODO: update the help info
     pub fn help(self) -> &'static str {
         match self {
             CurrentScreen::Main => {
                 "(q) / (esc) quit, (e) edit url, (tab) change request type, (p) change protocol, (enter) send request"
             }
-            CurrentScreen::Editing => "(esc) / (alt + s) save value",
-            CurrentScreen::History => "(esc) cancel, (q) quit",
+            CurrentScreen::Editing => "(esc) / (alt + s) save value, (tab) switch window",
+            CurrentScreen::History => "(esc) cancel, (q) quit, (enter) select request ",
             CurrentScreen::Collection => {
                 "(esc) cancel / (q) quit / (enter) add or select collection / (d) delete collection"
             }

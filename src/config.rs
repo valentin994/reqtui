@@ -27,6 +27,10 @@ pub fn get_collections_dir() -> Option<PathBuf> {
     Some(get_config_dir()?.join("collections"))
 }
 
+// TODO: when setting collection update config
+pub fn update_config() {
+    todo!()
+}
 pub fn load_config() -> Result<AppConfig, Box<dyn Error>> {
     let Some(config_dir) = get_config_dir() else {
         return Err("Could not find config directory".into());

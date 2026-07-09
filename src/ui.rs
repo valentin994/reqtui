@@ -12,6 +12,7 @@ use crate::theme::THEME;
 
 // TODO: UI revamp
 // TODO: moduliraze the UI
+// TODO: check the naming, make a naming convention
 
 pub fn render(app: &mut App, frame: &mut Frame) {
     let [request_layout, hero_layout, footer_layout] = Layout::default()
