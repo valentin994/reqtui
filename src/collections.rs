@@ -1,3 +1,4 @@
+// TODO: postman colletion support
 // TODO: file search for postman collections
 
 use std::{error::Error, fmt, fs, path::PathBuf};
@@ -60,7 +61,7 @@ impl CollectionStore {
         let Some(file_path) = Self::get_config_path() else {
             return Err("Could not access the base path".into());
         };
-        let full_path = file_path.join(format!("{}.json", &name));
+        let full_path = file_path.join(format!("{}.json", name));
         let new_collection: Collection = Collection {
             name: name.to_string(),
             requests: vec![],
@@ -74,7 +75,7 @@ impl CollectionStore {
         let Some(file_path) = Self::get_config_path() else {
             return Err("Could not access the base path".into());
         };
-        let full_path = file_path.join(format!("{}.json", &name));
+        let full_path = file_path.join(format!("{}.json", name));
         let _ = fs::remove_file(full_path);
         Ok(())
     }
