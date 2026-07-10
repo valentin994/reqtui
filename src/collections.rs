@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::api::Request;
 
-// TODO: make it possible to select collections
 #[derive(Default, Debug)]
 pub struct CollectionStore {
     pub collections: Vec<Collection>,

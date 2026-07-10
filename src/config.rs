@@ -27,10 +27,19 @@ pub fn get_collections_dir() -> Option<PathBuf> {
     Some(get_config_dir()?.join("collections"))
 }
 
-// TODO: when setting collection update config
-pub fn update_config() {
-    todo!()
+pub fn update_config_name(name: &str) -> Result<(), Box<dyn Error>> {
+    let Some(config_dir) = get_config_dir() else {
+        return Err("Could not find config directory".into());
+    };
+    let config_path = config_dir.join("config.json");
+    let contents = fs::read_to_string(&config_path)?;
+    let mut config: AppConfig = serde_json::from_str(&contents)?;
+    config.collection_name = name.to_owned();
+    let updated_config = serde_json::to_string_pretty(&config)?;
+    fs::write(&config_path, updated_config)?;
+    Ok(())
 }
+
 pub fn load_config() -> Result<AppConfig, Box<dyn Error>> {
     let Some(config_dir) = get_config_dir() else {
         return Err("Could not find config directory".into());

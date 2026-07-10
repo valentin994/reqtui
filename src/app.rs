@@ -9,7 +9,7 @@ use tui_input::Input;
 use crate::{
     api::{Protocol, Request, RequestType},
     collections::{Collection, CollectionStore},
-    config::AppConfig,
+    config::{AppConfig, update_config_name},
     theme::THEME,
 };
 
@@ -203,11 +203,12 @@ impl App {
             .and_then(|i| self.history.get_index(i))
     }
 
-    pub fn set_collection(&mut self) {
+    pub fn set_collection(&mut self) -> Result<(), Box<dyn Error>> {
         let Some(collection) = self.selected_collection().cloned() else {
-            return;
+            return Err("Could not set collection".into());
         };
         self.config.collection_name = collection.name;
+        update_config_name(&self.config.collection_name)?;
         self.history = CollectionStore::load_collection_to_history(&format!(
             "{}.json",
             self.config.collection_name
@@ -215,6 +216,7 @@ impl App {
         .unwrap_or_default();
         self.collection = CollectionStore::list_collections().expect("Couldnt load collection");
         self.current_screen = CurrentScreen::Main;
+        Ok(())
     }
 
     pub fn selected_collection(&mut self) -> Option<&Collection> {

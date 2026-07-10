@@ -87,7 +87,7 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             }
             KeyCode::Enter => match app.active_collection_field {
                 ActiveCollectionField::CollectionList => {
-                    app.set_collection();
+                    let _ = app.set_collection();
                 }
                 ActiveCollectionField::AddCollection => {
                     app.add_collection();
