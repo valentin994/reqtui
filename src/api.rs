@@ -28,6 +28,13 @@ impl RequestType {
             .unwrap();
         RequestType::VARIANTS[(idx + 1) % RequestType::VARIANTS.len()]
     }
+    pub fn previous(self) -> RequestType {
+        let idx = RequestType::VARIANTS
+            .iter()
+            .position(|&r| r == self)
+            .unwrap();
+        RequestType::VARIANTS[(idx + RequestType::VARIANTS.len() - 1) % RequestType::VARIANTS.len()]
+    }
 }
 
 #[derive(Debug, Hash, Default, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]

@@ -11,7 +11,6 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             KeyCode::Char('e') => app.current_screen = CurrentScreen::Editing,
             KeyCode::Char('h') => app.current_screen = CurrentScreen::History,
             KeyCode::Char('c') => app.current_screen = CurrentScreen::Collection,
-            // INFO:if I implement more protocols see RequestType iterator example for cycling
             KeyCode::Char('p') => {
                 app.protocol = match app.protocol {
                     Protocol::HTTP => Protocol::HTTPS,
@@ -24,12 +23,12 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             KeyCode::Down | KeyCode::Char('j') => {
                 app.scroll_response = app.scroll_response.saturating_add(1)
             }
+            KeyCode::BackTab => app.request_type = app.request_type.previous(),
             KeyCode::Tab => app.request_type = app.request_type.next(),
             KeyCode::Enter => app.send_request().expect("failed to send request"),
             _ => {}
         },
         CurrentScreen::Editing => match key_event.code {
-            // TODO: on escape don't save URL
             KeyCode::Tab => app.active_edit_field = app.active_edit_field.next(),
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,
             KeyCode::Char('s') if key_event.modifiers.contains(KeyModifiers::ALT) => {
