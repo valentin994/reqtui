@@ -20,6 +20,7 @@ pub enum CurrentScreen {
     Editing,
     History,
     Collection,
+    Error,
 }
 
 // TODO: change up the hotkeys and way of selecting request type
@@ -30,6 +31,7 @@ impl CurrentScreen {
             CurrentScreen::Editing => "Editing",
             CurrentScreen::History => "History",
             CurrentScreen::Collection => "Collection",
+            CurrentScreen::Error => "Error",
         }
     }
 
@@ -39,6 +41,7 @@ impl CurrentScreen {
             CurrentScreen::Editing => THEME.error,
             CurrentScreen::History => THEME.success,
             CurrentScreen::Collection => THEME.accent,
+            CurrentScreen::Error => THEME.error,
         }
     }
 
@@ -52,6 +55,7 @@ impl CurrentScreen {
             CurrentScreen::Collection => {
                 "(esc) cancel / (q) quit / (enter) add or select collection / (d) delete collection"
             }
+            CurrentScreen::Error => "(esc) back to main screen",
         }
     }
 }
@@ -113,6 +117,7 @@ pub struct App {
     pub collection_name: Input,
     pub active_collection_field: ActiveCollectionField,
 
+    pub error: String,
     pub should_quit: bool,
 }
 
@@ -137,7 +142,6 @@ impl App {
     // INFO: possible duplication with Request struct and url, right now overkill
     // TODO: add logging
     pub fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
-        self.loading = true;
         let request = Request {
             name: self.request_name.value().to_string(),
             protocol: self.protocol,
@@ -145,17 +149,31 @@ impl App {
             url: self.url.to_string(),
             body: self.body.lines().join("\n"),
         };
-        let client = self.client.clone();
-        let timeout = self.config.request_timeout;
-        self.history.insert(request.clone());
-        CollectionStore::write_to_collection(self.history.clone(), &self.config.collection_name)?;
-        self.pending_tasks = Some(tokio::spawn(async move {
-            request
-                .send(&client, timeout)
-                .await
-                .map_err(|e| e.to_string())
-        }));
-        Ok(())
+
+        match request.is_valid() {
+            true => {
+                self.loading = true;
+                let client = self.client.clone();
+                let timeout = self.config.request_timeout;
+                self.history.insert(request.clone());
+                CollectionStore::write_to_collection(
+                    self.history.clone(),
+                    &self.config.collection_name,
+                )?;
+                self.pending_tasks = Some(tokio::spawn(async move {
+                    request
+                        .send(&client, timeout)
+                        .await
+                        .map_err(|e| e.to_string())
+                }));
+                Ok(())
+            }
+            false => {
+                self.error = "Invalid url".to_string();
+                self.current_screen = CurrentScreen::Error;
+                Ok(())
+            }
+        }
     }
 
     pub fn poll_requests(&mut self) {

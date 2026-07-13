@@ -1,5 +1,6 @@
 use std::{error::Error, fmt, time::Duration};
 
+use regex::regex;
 use reqwest::{Client, header::CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
 
@@ -95,5 +96,10 @@ impl Request {
             Err(e) if e.is_timeout() => Ok("timeout".to_string()),
             Err(e) => Err(Box::new(e)),
         }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        let url = format!("{}://{}", self.protocol, self.url);
+        regex!(r"^(https?://)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*/?$").is_match(&url)
     }
 }

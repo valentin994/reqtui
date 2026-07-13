@@ -9,9 +9,12 @@ Do I care, absolutely not.
 ## Features
 
 - Send HTTP requests: **GET, POST, PUT, PATCH, DELETE**
-- **Async non-blocking requests** with a 4-second timeout
+- **Async non-blocking requests** with a 5-second default timeout
 - **Session history** — browse and re-load previous requests
 - **Collections** - save your requests between sessions
+- **Load testing** TODO
+- Import **Postman** collection TODO
+- **Telescope** like search for requests TODO
 
 ## Build & Run
 

@@ -100,5 +100,9 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
                 ActiveCollectionField::CollectionList => {}
             },
         },
+        CurrentScreen::Error => match key_event.code {
+            KeyCode::Esc => app.current_screen = CurrentScreen::Main,
+            _ => {}
+        },
     }
 }

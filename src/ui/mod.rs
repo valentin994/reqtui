@@ -19,6 +19,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         CurrentScreen::Editing => request_view::render(app, frame),
         CurrentScreen::History => history_view::render(app, frame),
         CurrentScreen::Collection => collection_view::render(app, frame),
+        CurrentScreen::Error => error_view::render(app, frame),
         _ => {}
     }
 
