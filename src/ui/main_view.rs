@@ -19,12 +19,12 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         ])
         .areas(frame.area());
 
-    let [protocol, request] =
+    let [protocol_layout, request_layout] =
         Layout::horizontal([Constraint::Length(12), Constraint::Percentage(100)])
             .flex(Flex::Start)
             .areas(request_layout);
 
-    let [collection, response, body] = Layout::horizontal([
+    let [collection_layout, response_layout, body_layout] = Layout::horizontal([
         Constraint::Length(20),
         Constraint::Percentage(100),
         Constraint::Length(30),
@@ -43,7 +43,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .style(THEME.text)
         .highlight_style(Modifier::REVERSED)
         .highlight_symbol("> ");
-    frame.render_stateful_widget(history_list, collection, &mut app.history_state);
+    frame.render_stateful_widget(history_list, collection_layout, &mut app.history_state);
 
     let request_type_block = Block::default()
         .border_style(THEME.text)
@@ -88,7 +88,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         )
         .scroll((app.scroll_response, 0));
 
-    let [mode, help] = Layout::default()
+    let [mode_layout, help_layout] = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Length(12), Constraint::Percentage(100)])
         .areas(footer_layout);
@@ -97,18 +97,18 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let current_screen_color = app.current_screen.color();
     let current_screen_help = app.current_screen.help();
 
-    let [centered] = Layout::horizontal([Constraint::Length(12)])
+    let [centered_layout] = Layout::horizontal([Constraint::Length(12)])
         .flex(Flex::Center)
-        .areas(mode);
+        .areas(mode_layout);
 
-    let nav = Paragraph::new(Span::styled(
+    let navigation_paragraph = Paragraph::new(Span::styled(
         current_screen_name,
         Style::default().fg(THEME.text).bold(),
     ))
     .alignment(Alignment::Center)
     .bg(current_screen_color);
 
-    let current_screen_help = Paragraph::new(Line::from(current_screen_help)).block(
+    let current_screen_help_paragraph = Paragraph::new(Line::from(current_screen_help)).block(
         Block::default()
             .bg(THEME.secondary)
             .padding(Padding::left(2)),
@@ -124,10 +124,10 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             .style(THEME.derive_body(app.request_type)),
     );
 
-    frame.render_widget(request_type_paragraph, protocol);
-    frame.render_widget(url_paragraph, request);
-    frame.render_widget(response_paragraph, response);
-    frame.render_widget(parsed_json_paragraph, body);
-    frame.render_widget(nav, centered);
-    frame.render_widget(current_screen_help, help);
+    frame.render_widget(request_type_paragraph, protocol_layout);
+    frame.render_widget(url_paragraph, request_layout);
+    frame.render_widget(response_paragraph, response_layout);
+    frame.render_widget(parsed_json_paragraph, body_layout);
+    frame.render_widget(navigation_paragraph, centered_layout);
+    frame.render_widget(current_screen_help_paragraph, help_layout);
 }

@@ -9,11 +9,9 @@ use ratatui::Frame;
 
 use crate::app::{App, CurrentScreen};
 
-// TODO: UI revamp
 // TODO: check the naming, make a naming convention
 
 pub fn render(app: &mut App, frame: &mut Frame) {
-    // TODO: if the url is not correct raise error box before send
     main_view::render(app, frame);
     match app.current_screen {
         CurrentScreen::Editing => request_view::render(app, frame),

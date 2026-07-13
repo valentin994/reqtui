@@ -139,7 +139,6 @@ impl App {
         self.should_quit = true;
     }
 
-    // INFO: possible duplication with Request struct and url, right now overkill
     // TODO: add logging
     pub fn send_request(&mut self) -> Result<(), Box<dyn Error>> {
         let request = Request {

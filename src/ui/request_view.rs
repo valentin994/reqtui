@@ -16,7 +16,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .area()
         .centered(Constraint::Percentage(60), Constraint::Percentage(80));
 
-    let [edit_name, edit_url, edit_body] = Layout::vertical([
+    let [edit_name_layout, edit_url_layout, edit_body_layout] = Layout::vertical([
         Constraint::Length(3),
         Constraint::Length(3),
         Constraint::Min(3),
@@ -86,16 +86,16 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         })
         .block(url_block);
 
-    frame.render_widget(request_name_paragraph, edit_name);
-    frame.render_widget(url_paragraph, edit_url);
+    frame.render_widget(request_name_paragraph, edit_name_layout);
+    frame.render_widget(url_paragraph, edit_url_layout);
 
     if app.active_edit_field == ActiveEditField::Url {
         let x = app.url.visual_cursor().max(scroll) - scroll + 1;
-        frame.set_cursor_position((edit_url.x + x as u16, edit_url.y + 1));
+        frame.set_cursor_position((edit_url_layout.x + x as u16, edit_url_layout.y + 1));
     } else if app.active_edit_field == ActiveEditField::Name {
         let x = app.request_name.visual_cursor().max(request_name_scroll) - request_name_scroll + 1;
-        frame.set_cursor_position((edit_name.x + x as u16, edit_name.y + 1));
+        frame.set_cursor_position((edit_name_layout.x + x as u16, edit_name_layout.y + 1));
     }
 
-    frame.render_widget(&app.body, edit_body);
+    frame.render_widget(&app.body, edit_body_layout);
 }

@@ -21,8 +21,8 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let area = frame
         .area()
         .centered(Constraint::Percentage(50), Constraint::Length(3));
-    let popup = Paragraph::new(format!("{}", app.url)).block(Block::bordered());
+    let popup_paragraph = Paragraph::new(format!("{}", app.url)).block(Block::bordered());
     frame.render_widget(Clear, area);
-    frame.render_widget(popup, area);
+    frame.render_widget(popup_paragraph, area);
     frame.render_stateful_widget(loading_widget, area, &mut app.throbber_state);
 }
