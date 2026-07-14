@@ -4,6 +4,7 @@ pub mod history_view;
 pub mod loading_view;
 pub mod main_view;
 pub mod request_view;
+pub mod testing_view;
 
 use ratatui::Frame;
 
@@ -18,6 +19,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         CurrentScreen::History => history_view::render(app, frame),
         CurrentScreen::Collection => collection_view::render(app, frame),
         CurrentScreen::Error => error_view::render(app, frame),
+        CurrentScreen::Testing => testing_view::render(app, frame),
         _ => {}
     }
 

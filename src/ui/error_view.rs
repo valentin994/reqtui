@@ -13,7 +13,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     frame.render_widget(Clear, centered_area);
 
     let error_block = Block::new().borders(Borders::ALL).style(THEME.error);
-    let error_paragraph = Paragraph::new(format!("{}", app.error))
+    let error_paragraph = Paragraph::new(app.error.to_string())
         .centered()
         .block(error_block);
 

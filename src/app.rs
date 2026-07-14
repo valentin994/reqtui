@@ -21,6 +21,7 @@ pub enum CurrentScreen {
     History,
     Collection,
     Error,
+    Testing,
 }
 
 // TODO: change up the hotkeys and way of selecting request type
@@ -32,6 +33,7 @@ impl CurrentScreen {
             CurrentScreen::History => "History",
             CurrentScreen::Collection => "Collection",
             CurrentScreen::Error => "Error",
+            CurrentScreen::Testing => "Testing",
         }
     }
 
@@ -42,6 +44,7 @@ impl CurrentScreen {
             CurrentScreen::History => THEME.success,
             CurrentScreen::Collection => THEME.accent,
             CurrentScreen::Error => THEME.error,
+            CurrentScreen::Testing => THEME.patch,
         }
     }
 
@@ -55,7 +58,8 @@ impl CurrentScreen {
             CurrentScreen::Collection => {
                 "(esc) cancel / (q) quit / (enter) add or select collection / (d) delete collection"
             }
-            CurrentScreen::Error => "(esc) back to main screen",
+            CurrentScreen::Error => "(esc) back to main screen, (q) quit",
+            CurrentScreen::Testing => "(esc) back to main screen, (q) quit",
         }
     }
 }

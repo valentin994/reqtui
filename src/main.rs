@@ -3,6 +3,7 @@ pub mod app;
 pub mod collections;
 pub mod config;
 pub mod event;
+pub mod load_testing;
 pub mod theme;
 pub mod tui;
 pub mod ui;

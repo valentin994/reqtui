@@ -13,6 +13,9 @@ Do I care, absolutely not.
 - **Session history** — browse and re-load previous requests
 - **Collections** - save your requests between sessions
 - **Load testing** TODO
+    - **Basic** One request with result graphs
+    - **Intermediate** Multiple requests concurrently with graphs
+    - **Advanced** Dependecy support
 - Import **Postman** collection TODO
 - **Telescope** like search for requests TODO
 
@@ -69,3 +72,16 @@ No config files, no environment variables, no arguments needed.
 | `Enter` | Add new collection |
 | `Esc` | Return to main screen |
 | `q` / `Esc` | Quit |
+
+### Testing Overlay
+| Key | Action |
+|---|---|
+| `Esc` | Return to main screen |
+| `q` / `Esc` | Quit |
+
+### Error Overlay
+| Key | Action |
+|---|---|
+| `Esc` | Return to main screen |
+| `q` / `Esc` | Quit |
+

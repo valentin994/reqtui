@@ -11,6 +11,7 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             KeyCode::Char('e') => app.current_screen = CurrentScreen::Editing,
             KeyCode::Char('h') => app.current_screen = CurrentScreen::History,
             KeyCode::Char('c') => app.current_screen = CurrentScreen::Collection,
+            KeyCode::Char('l') => app.current_screen = CurrentScreen::Testing,
             KeyCode::Char('p') => {
                 app.protocol = match app.protocol {
                     Protocol::HTTP => Protocol::HTTPS,
@@ -102,6 +103,12 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
         },
         CurrentScreen::Error => match key_event.code {
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,
+            KeyCode::Char('q') => app.quit(),
+            _ => {}
+        },
+        CurrentScreen::Testing => match key_event.code {
+            KeyCode::Esc => app.current_screen = CurrentScreen::Main,
+            KeyCode::Char('q') => app.quit(),
             _ => {}
         },
     }
