@@ -7,7 +7,7 @@ use tokio::task::JoinHandle;
 use tui_input::Input;
 
 use crate::{
-    api::{Protocol, Request, RequestType},
+    api::{Protocol, Request, RequestType, ResponseData},
     collections::{Collection, CollectionStore},
     config::{AppConfig, update_config_name},
     theme::THEME,
@@ -106,10 +106,11 @@ pub struct App {
     pub protocol: Protocol,
     pub body: TextArea<'static>,
     pub scroll_response: u16,
+    pub status_code: u16,
     pub active_edit_field: ActiveEditField,
 
     pub client: Client,
-    pub pending_tasks: Option<JoinHandle<Result<String, String>>>,
+    pub pending_tasks: Option<JoinHandle<Result<ResponseData, String>>>,
 
     pub history: IndexSet<Request>,
     pub history_state: ListState,
@@ -190,7 +191,10 @@ impl App {
             let handle = self.pending_tasks.take().unwrap();
 
             match futures::executor::block_on(handle) {
-                Ok(Ok(body)) => self.response = body,
+                Ok(Ok(resp)) => {
+                    self.response = resp.body;
+                    self.status_code = resp.status;
+                }
                 Ok(Err(e)) => self.response = e,
                 Err(_) => self.response = "Request couldn't be executed".to_string(),
             }

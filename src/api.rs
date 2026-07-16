@@ -4,6 +4,8 @@ use regex::regex;
 use reqwest::{Client, header::CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
 
+// TODO: maybe implement response type so I can showcase more info
+
 #[derive(Debug, Deserialize, Serialize, Default, Hash, Clone, Copy, PartialEq, Eq)]
 pub enum RequestType {
     #[default]
@@ -70,7 +72,7 @@ impl fmt::Display for Request {
 }
 
 impl Request {
-    pub async fn send(&self, client: &Client, timeout: u8) -> Result<String, Box<dyn Error>> {
+    pub async fn send(&self, client: &Client, timeout: u8) -> Result<ResponseData, Box<dyn Error>> {
         let prepare_request = match self.request_type {
             RequestType::GET => client.get(format!("{}://{}", self.protocol, self.url)),
             RequestType::POST => client
@@ -92,8 +94,10 @@ impl Request {
             .send()
             .await
         {
-            Ok(resp) => Ok(resp.text().await?),
-            Err(e) if e.is_timeout() => Ok("timeout".to_string()),
+            Ok(resp) => Ok(ResponseData {
+                status: resp.status().into(),
+                body: resp.text().await?,
+            }),
             Err(e) => Err(Box::new(e)),
         }
     }
@@ -102,4 +106,10 @@ impl Request {
         let url = format!("{}://{}", self.protocol, self.url);
         regex!(r"^(https?://)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*/?$").is_match(&url)
     }
+}
+
+#[derive(Debug)]
+pub struct ResponseData {
+    pub status: u16,
+    pub body: String,
 }

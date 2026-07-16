@@ -8,7 +8,7 @@ use ratatui::{
 use crate::{app::App, theme::THEME};
 
 pub fn render(app: &mut App, frame: &mut Frame) {
-    let [added_requests_layout, history_layout, footer_layout] = Layout::default()
+    let [added_requests_layout, history_layout, _footer_layout] = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Percentage(50),

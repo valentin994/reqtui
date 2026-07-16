@@ -32,6 +32,19 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     .flex(Flex::Start)
     .areas(hero_layout);
 
+    let response_layout_block = Block::new().borders(Borders::ALL).style(THEME.text);
+
+    let [response_details_layout, response_body_layout] =
+        Layout::vertical([Constraint::Length(3), Constraint::Percentage(100)])
+            .flex(Flex::Start)
+            .areas(response_layout);
+
+    let response_details_block = Block::new();
+
+    let response_details_paragraph = Paragraph::new(format!("Status is: {}", app.status_code))
+        .block(response_details_block)
+        .style(Style::default());
+
     let collection_lines: Vec<String> = app.history.iter().map(|req| format!("{}", req)).collect();
     let history_list = List::new(collection_lines)
         .block(
@@ -52,9 +65,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     let request_type_paragraph = Paragraph::new(Text::styled(
         format!("{:?}", app.request_type),
-        Style::default()
-            .bold()
-            .fg(THEME.derive_request(app.request_type)),
+        Style::default().bold(),
     ))
     .block(request_type_block);
 
@@ -81,11 +92,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     let response_paragraph = Paragraph::new(lines)
         .style(Style::default().fg(THEME.text))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_style(THEME.text),
-        )
+        .block(Block::default().padding(Padding::new(4, 1, 1, 4)))
         .scroll((app.scroll_response, 0));
 
     let [mode_layout, help_layout] = Layout::default()
@@ -126,8 +133,10 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     frame.render_widget(request_type_paragraph, protocol_layout);
     frame.render_widget(url_paragraph, request_layout);
-    frame.render_widget(response_paragraph, response_layout);
+    frame.render_widget(response_layout_block, response_layout);
+    frame.render_widget(response_paragraph, response_body_layout);
     frame.render_widget(parsed_json_paragraph, body_layout);
+    frame.render_widget(response_details_paragraph, response_details_layout);
     frame.render_widget(navigation_paragraph, centered_layout);
     frame.render_widget(current_screen_help_paragraph, help_layout);
 }
