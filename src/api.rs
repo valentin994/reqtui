@@ -94,10 +94,16 @@ impl Request {
             .send()
             .await
         {
-            Ok(resp) => Ok(ResponseData {
-                status: resp.status().into(),
-                body: resp.text().await?,
-            }),
+            Ok(resp) => {
+                let status = resp.status().into();
+                let version = format!("{:?}", resp.version());
+                let body = resp.text().await?;
+                Ok(ResponseData {
+                    status,
+                    version,
+                    body,
+                })
+            }
             Err(e) => Err(Box::new(e)),
         }
     }
@@ -112,4 +118,5 @@ impl Request {
 pub struct ResponseData {
     pub status: u16,
     pub body: String,
+    pub version: String,
 }

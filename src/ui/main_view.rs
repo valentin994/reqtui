@@ -34,17 +34,22 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     let response_layout_block = Block::new().borders(Borders::ALL).style(THEME.text);
 
+    let inner_area = response_layout_block.inner(response_layout);
+
     let [response_details_layout, response_body_layout] =
-        Layout::vertical([Constraint::Length(3), Constraint::Percentage(100)])
-            .flex(Flex::Start)
-            .areas(response_layout);
+        Layout::vertical([Constraint::Length(2), Constraint::Fill(1)]).areas(inner_area);
 
     let response_details_block = Block::new();
 
-    let response_details_paragraph = Paragraph::new(format!("Status is: {}", app.status_code))
+    let response_details_paragraph = if app.status_code != 0 {
+        Paragraph::new(format!(
+            "Status {}, Version: {}",
+            app.status_code, app.http_version
+        ))
         .block(response_details_block)
-        .style(Style::default());
-
+    } else {
+        Paragraph::new("").block(response_details_block)
+    };
     let collection_lines: Vec<String> = app.history.iter().map(|req| format!("{}", req)).collect();
     let history_list = List::new(collection_lines)
         .block(
@@ -92,7 +97,6 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     let response_paragraph = Paragraph::new(lines)
         .style(Style::default().fg(THEME.text))
-        .block(Block::default().padding(Padding::new(4, 1, 1, 4)))
         .scroll((app.scroll_response, 0));
 
     let [mode_layout, help_layout] = Layout::default()

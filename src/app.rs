@@ -24,6 +24,8 @@ pub enum CurrentScreen {
     Testing,
 }
 
+// TODO: package into debian and host
+
 // TODO: change up the hotkeys and way of selecting request type
 impl CurrentScreen {
     pub fn name(self) -> &'static str {
@@ -106,7 +108,10 @@ pub struct App {
     pub protocol: Protocol,
     pub body: TextArea<'static>,
     pub scroll_response: u16,
+
     pub status_code: u16,
+    pub http_version: String,
+
     pub active_edit_field: ActiveEditField,
 
     pub client: Client,
@@ -194,6 +199,7 @@ impl App {
                 Ok(Ok(resp)) => {
                     self.response = resp.body;
                     self.status_code = resp.status;
+                    self.http_version = resp.version;
                 }
                 Ok(Err(e)) => self.response = e,
                 Err(_) => self.response = "Request couldn't be executed".to_string(),
