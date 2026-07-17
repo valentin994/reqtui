@@ -23,7 +23,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         app.history_state.select(Some(0));
     }
 
-    let lines: Vec<String> = app.history.iter().map(|req| format!("{}", req)).collect();
+    let lines: Vec<String> = app.history.iter().map(|req| format!("{req}")).collect();
     let history_list = List::new(lines)
         .block(
             Block::default()

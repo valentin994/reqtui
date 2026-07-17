@@ -19,10 +19,10 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
                 }
             }
             KeyCode::Up | KeyCode::Char('k') => {
-                app.scroll_response = app.scroll_response.saturating_sub(1)
+                app.scroll_response = app.scroll_response.saturating_sub(1);
             }
             KeyCode::Down | KeyCode::Char('j') => {
-                app.scroll_response = app.scroll_response.saturating_add(1)
+                app.scroll_response = app.scroll_response.saturating_add(1);
             }
             KeyCode::BackTab => app.request_type = app.request_type.previous(),
             KeyCode::Tab => app.request_type = app.request_type.next(),
@@ -33,7 +33,7 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             KeyCode::Tab => app.active_edit_field = app.active_edit_field.next(),
             KeyCode::Esc => app.current_screen = CurrentScreen::Main,
             KeyCode::Char('s') if key_event.modifiers.contains(KeyModifiers::ALT) => {
-                app.current_screen = CurrentScreen::Main
+                app.current_screen = CurrentScreen::Main;
             }
             _ => match app.active_edit_field {
                 ActiveEditField::Name => {
@@ -69,7 +69,7 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             KeyCode::Up | KeyCode::Char('k')
                 if app.active_collection_field == ActiveCollectionField::CollectionList =>
             {
-                app.collection_state.select_previous()
+                app.collection_state.select_previous();
             }
             KeyCode::Char('d')
                 if app.active_collection_field == ActiveCollectionField::CollectionList =>
@@ -84,7 +84,7 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             KeyCode::Down | KeyCode::Char('j')
                 if app.active_collection_field == ActiveCollectionField::CollectionList =>
             {
-                app.collection_state.select_next()
+                app.collection_state.select_next();
             }
             KeyCode::Enter => match app.active_collection_field {
                 ActiveCollectionField::CollectionList => {
@@ -102,7 +102,7 @@ pub async fn update(app: &mut App, key_event: KeyEvent) {
             },
         },
         CurrentScreen::Error => match key_event.code {
-            KeyCode::Esc => app.current_screen = CurrentScreen::Main,
+            KeyCode::Esc | KeyCode::Enter => app.current_screen = CurrentScreen::Main,
             KeyCode::Char('q') => app.quit(),
             _ => {}
         },

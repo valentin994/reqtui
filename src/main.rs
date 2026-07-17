@@ -43,8 +43,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 app.poll_requests();
             }
             Event::Key(key_event) => update(&mut app, key_event).await,
-            Event::Mouse(_) => {}
-            Event::Resize(_, _) => {}
+            Event::Mouse(_) | Event::Resize(_, _) => {}
         }
     }
     tui.exit()?;
