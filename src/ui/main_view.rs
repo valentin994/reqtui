@@ -47,6 +47,9 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             app.status_code, app.http_version
         ))
         .block(response_details_block)
+        .style(Style::default())
+        .fg(THEME.secondary)
+        .add_modifier(Modifier::BOLD)
     } else {
         Paragraph::new("").block(response_details_block)
     };
