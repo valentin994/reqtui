@@ -107,10 +107,15 @@ impl Request {
             Err(e) => Err(Box::new(e)),
         }
     }
-
     pub fn is_valid(&self) -> bool {
         let url = format!("{}://{}", self.protocol, self.url);
-        regex!(r"^(https?://)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*/?$").is_match(&url)
+
+        // localhost with optional port and path
+        if regex!(r"^(https?://)?localhost(:\d+)?(/[\w .-]*)*/?$").is_match(&url) {
+            return true;
+        }
+
+        regex!(r"^(https?://)?([\da-z.-]+)\.([a-z.]{2,6})(:\d+)?([/\w .-]*)*/?$").is_match(&url)
     }
 }
 
