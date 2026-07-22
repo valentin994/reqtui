@@ -3,6 +3,12 @@ name = "reqtui"
 version = "0.1.0"
 edition = "2024"
 
+[package.metadata.deb]
+maintainer = "Valentin Vareskic <valentin.vareskic@gmail.com>"
+assets = [
+    ["target/release/reqtui", "usr/bin/", "755"],
+]
+
 [dependencies]
 color-eyre = "0.6.5"
 directories = "6.0.0"
