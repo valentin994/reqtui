@@ -2,6 +2,13 @@
 name = "reqtui"
 version = "0.1.0"
 edition = "2024"
+description = "A tui application for doing HTTP requests"
+license = "LICENSE"
+repository = "https://github.com/valentin994/reqtui"
+readme = "README.md"
+keywords = ["tui", "cli", "http", "async", "terminal"]
+categories = ["command-line-utilities", "development-tools"]
+
 
 [package.metadata.deb]
 maintainer = "Valentin Vareskic <valentin.vareskic@gmail.com>"
