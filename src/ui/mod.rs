@@ -10,8 +10,6 @@ use ratatui::Frame;
 
 use crate::app::{App, CurrentScreen};
 
-// TODO: check the naming, make a naming convention
-
 pub fn render(app: &mut App, frame: &mut Frame) {
     main_view::render(app, frame);
     match app.current_screen {

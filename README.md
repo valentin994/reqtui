@@ -2,7 +2,7 @@
 
 A postman tui clone that is being built for me to detox from the AI hype.
 Pure, handwritten code. Would an LLM write this faster and better, yeap most likely.
-Do I care, absolutely not.
+Do I care, absolutely not. 
 
 <img width="1830" height="784" alt="demo" src="https://github.com/user-attachments/assets/55465cac-272e-4ddb-969b-0ca44ed8e420" />
 

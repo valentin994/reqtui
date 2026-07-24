@@ -20,7 +20,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
         .areas(frame.area());
 
     let [protocol_layout, request_layout] =
-        Layout::horizontal([Constraint::Length(12), Constraint::Percentage(100)])
+        Layout::horizontal([Constraint::Length(12), Constraint::Fill(100)])
             .flex(Flex::Start)
             .areas(request_layout);
 
@@ -73,7 +73,9 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     let request_type_paragraph = Paragraph::new(Text::styled(
         format!("{:?}", app.request_type),
-        Style::default().bold(),
+        Style::default()
+            .fg(THEME.derive_request(app.request_type))
+            .bold(),
     ))
     .block(request_type_block);
 

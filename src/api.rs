@@ -4,8 +4,6 @@ use regex::regex;
 use reqwest::{Client, header::CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
 
-// TODO: maybe implement response type so I can showcase more info
-
 #[derive(Debug, Deserialize, Serialize, Default, Hash, Clone, Copy, PartialEq, Eq)]
 pub enum RequestType {
     #[default]
