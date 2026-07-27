@@ -24,8 +24,6 @@ pub enum CurrentScreen {
     Testing,
 }
 
-// TODO: package into debian and host
-
 // TODO: change up the hotkeys and way of selecting request type
 impl CurrentScreen {
     pub fn name(self) -> &'static str {
@@ -214,6 +212,7 @@ impl App {
         };
         self.url = Input::new(req.url);
         self.protocol = req.protocol;
+        self.request_name = req.name.into();
         self.request_type = req.request_type;
         self.body = TextArea::from(req.body.lines());
         self.current_screen = CurrentScreen::Main;
