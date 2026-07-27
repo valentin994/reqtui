@@ -40,8 +40,10 @@ No config files, no environment variables, no arguments needed.
 | `e` | Open request editor |
 | `h` | Open history |
 | `c` | Open collections |
+| `l` | Open load testing |
 | `Enter` | Send request |
-| `Tab` | Cycle HTTP method |
+| `Tab` | Cycle HTTP method forward |
+| `Shift+Tab` | Cycle HTTP method backward |
 | `p` | Toggle HTTP / HTTPS |
 | `↑` / `k` | Scroll response up |
 | `↓` / `j` | Scroll response down |
@@ -50,8 +52,8 @@ No config files, no environment variables, no arguments needed.
 ### Editing Overlay
 | Key | Action |
 |---|---|
-| `Tab` | Switch focus between URL and Body |
-| `Esc` / `Enter` | Return to main screen |
+| `Tab` | Cycle focus: Name → URL → Body |
+| `Esc` / `Alt+S` | Return to main screen |
 
 ### History Overlay
 | Key | Action |
@@ -59,29 +61,30 @@ No config files, no environment variables, no arguments needed.
 | `↑` / `k` | Previous entry |
 | `↓` / `j` | Next entry |
 | `Enter` | Load selected request |
+| `d` | Delete selected request |
 | `Esc` | Return to main screen |
-| `q` / `Esc` | Quit |
+| `q` | Quit |
 
 ### Collection Overlay
 | Key | Action |
 |---|---|
-| `↑` / `k` | Previous entry |
-| `↓` / `j` | Next entry |
-| `d` | Delete collection |
-| `Enter` | Load selected collection |
-| `Enter` | Add new collection |
+| `Tab` | Switch focus between list and new collection input |
+| `↑` / `k` | Previous entry (list focused) |
+| `↓` / `j` | Next entry (list focused) |
+| `d` | Delete selected collection (list focused) |
+| `Enter` | Load selected collection (list focused) / Add new collection (input focused) |
 | `Esc` | Return to main screen |
-| `q` / `Esc` | Quit |
+| `q` | Quit (list focused) |
 
 ### Testing Overlay
 | Key | Action |
 |---|---|
 | `Esc` | Return to main screen |
-| `q` / `Esc` | Quit |
+| `q` | Quit |
 
 ### Error Overlay
 | Key | Action |
 |---|---|
-| `Esc` | Return to main screen |
-| `q` / `Esc` | Quit |
+| `Esc` / `Enter` | Return to main screen |
+| `q` | Quit |
 
