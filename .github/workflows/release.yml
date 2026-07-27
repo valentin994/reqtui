@@ -15,7 +15,24 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
+  changelog:
+    runs-on: ubuntu-latest
+    outputs:
+      release_body: ${{ steps.git-cliff.outputs.content }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        
+      - name: Generate changelog
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          args: --latest --strip header
+        env:
+          OUTPUT: CHANGELOG.md
+
   release-deb:
+    needs: changelog
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,6 +42,7 @@ jobs:
       - run: cp target/debian/*.deb reqtui_latest_amd64.deb
       - uses: softprops/action-gh-release@v2
         with:
+          body: ${{ needs.changelog.outputs.release_body }}
           files: |
             target/debian/*.deb
             reqtui_latest_amd64.deb
